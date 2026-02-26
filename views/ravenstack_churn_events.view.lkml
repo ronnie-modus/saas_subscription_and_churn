@@ -1,4 +1,4 @@
-view: ravenstack_churn_events {
+view: churn_events {
   sql_table_name: `saas_subscription_and_churn_analytics_dataset_demo.ravenstack_churn_events` ;;
 
   # -------------------------------------------------------
@@ -82,7 +82,7 @@ view: ravenstack_churn_events {
 
   dimension: has_feedback {
     type:        yesno
-    sql:         ${TABLE}.feedback_text IS NOT NULL AND ${TABLE}.feedback_text != '' ;;
+    sql:         ${TABLE}.feedback_text IS NOT NULL AND TRIM(${TABLE}.feedback_text) != '' ;;
     label:       "Has Feedback?"
     description: "True if the churned customer left written feedback."
   }
@@ -124,14 +124,14 @@ view: ravenstack_churn_events {
 
   dimension: preceding_upgrade_flag {
     type:        yesno
-    sql:         ${TABLE}.preceding_upgrade_flag ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.preceding_upgrade_flag AS BOOL), FALSE) ;;
     label:       "Upgrade Before Churn?"
     description: "True if account upgraded within 90 days before churning."
   }
 
   dimension: preceding_downgrade_flag {
     type:        yesno
-    sql:         ${TABLE}.preceding_downgrade_flag ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.preceding_downgrade_flag AS BOOL), FALSE) ;;
     label:       "Downgrade Before Churn?"
     description: "True if account downgraded within 90 days before churning — a strong churn signal."
   }
@@ -139,11 +139,11 @@ view: ravenstack_churn_events {
   dimension: pre_churn_signal {
     type:        string
     sql:         CASE
-                   WHEN ${TABLE}.preceding_downgrade_flag = TRUE AND ${TABLE}.preceding_upgrade_flag = FALSE
+                   WHEN COALESCE(SAFE_CAST(${TABLE}.preceding_downgrade_flag AS BOOL), FALSE) AND NOT COALESCE(SAFE_CAST(${TABLE}.preceding_upgrade_flag AS BOOL), FALSE)
                      THEN 'Downgrade → Churn'
-                   WHEN ${TABLE}.preceding_upgrade_flag = TRUE AND ${TABLE}.preceding_downgrade_flag = FALSE
+                   WHEN COALESCE(SAFE_CAST(${TABLE}.preceding_upgrade_flag AS BOOL), FALSE) AND NOT COALESCE(SAFE_CAST(${TABLE}.preceding_downgrade_flag AS BOOL), FALSE)
                      THEN 'Upgrade → Churn'
-                   WHEN ${TABLE}.preceding_upgrade_flag = TRUE AND ${TABLE}.preceding_downgrade_flag = TRUE
+                   WHEN COALESCE(SAFE_CAST(${TABLE}.preceding_upgrade_flag AS BOOL), FALSE) AND COALESCE(SAFE_CAST(${TABLE}.preceding_downgrade_flag AS BOOL), FALSE)
                      THEN 'Both Changes → Churn'
                    ELSE 'No Plan Change Before Churn'
                  END ;;
@@ -153,7 +153,7 @@ view: ravenstack_churn_events {
 
   dimension: is_reactivation {
     type:        yesno
-    sql:         ${TABLE}.is_reactivation ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.is_reactivation AS BOOL), FALSE) ;;
     label:       "Was Reactivation?"
     description: "True if this churn event was from an account that had previously churned and reactivated (~10%)."
   }
@@ -251,7 +251,7 @@ view: ravenstack_churn_events {
   measure: feedback_response_rate {
     type:        number
     sql:         SAFE_DIVIDE(
-                   COUNTIF(${TABLE}.feedback_text IS NOT NULL AND ${TABLE}.feedback_text != ''),
+                   COUNTIF(${TABLE}.feedback_text IS NOT NULL AND TRIM(${TABLE}.feedback_text) != ''),
                    NULLIF(COUNT(*), 0)
                  ) ;;
     label:       "Feedback Response Rate"

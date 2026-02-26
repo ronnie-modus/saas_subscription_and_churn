@@ -1,4 +1,4 @@
-view: ravenstack_feature_usage {
+view: feature_usage {
   sql_table_name: `saas_subscription_and_churn_analytics_dataset_demo.ravenstack_feature_usage` ;;
 
   # -------------------------------------------------------
@@ -52,7 +52,7 @@ view: ravenstack_feature_usage {
 
   dimension: is_beta_feature {
     type:        yesno
-    sql:         ${TABLE}.is_beta_feature ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.is_beta_feature AS BOOL), FALSE) ;;
     label:       "Is Beta Feature?"
     description: "True if this feature is flagged as a beta feature (~10%)."
   }
@@ -60,7 +60,7 @@ view: ravenstack_feature_usage {
   dimension: feature_type {
     type:        string
     sql:         CASE
-                   WHEN ${TABLE}.is_beta_feature = TRUE THEN 'Beta'
+                   WHEN COALESCE(SAFE_CAST(${TABLE}.is_beta_feature AS BOOL), FALSE) THEN 'Beta'
                    ELSE 'GA'
                  END ;;
     label:       "Feature Type"
@@ -231,7 +231,10 @@ view: ravenstack_feature_usage {
 
   measure: beta_adoption_rate {
     type:        number
-    sql:         SAFE_DIVIDE(${count_beta_events}, NULLIF(${count}, 0)) ;;
+    sql:         SAFE_DIVIDE(
+                   COUNTIF(COALESCE(SAFE_CAST(${TABLE}.is_beta_feature AS BOOL), FALSE)),
+                   NULLIF(COUNT(*), 0)
+                 ) ;;
     label:       "Beta Feature Adoption Rate"
     description: "Percentage of usage events on beta features."
     value_format_name: percent_2

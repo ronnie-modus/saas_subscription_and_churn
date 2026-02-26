@@ -1,4 +1,4 @@
-view: ravenstack_subscriptions {
+view: subscriptions {
   sql_table_name: `saas_subscription_and_churn_analytics_dataset_demo.ravenstack_subscriptions` ;;
 
   # -------------------------------------------------------
@@ -162,35 +162,35 @@ view: ravenstack_subscriptions {
 
   dimension: is_trial {
     type:        yesno
-    sql:         ${TABLE}.is_trial ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.is_trial AS BOOL), FALSE) ;;
     label:       "Is Trial?"
     description: "Whether this subscription is a trial."
   }
 
   dimension: upgrade_flag {
     type:        yesno
-    sql:         ${TABLE}.upgrade_flag ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.upgrade_flag AS BOOL), FALSE) ;;
     label:       "Was Upgraded?"
     description: "Plan was upgraded mid-cycle."
   }
 
   dimension: downgrade_flag {
     type:        yesno
-    sql:         ${TABLE}.downgrade_flag ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.downgrade_flag AS BOOL), FALSE) ;;
     label:       "Was Downgraded?"
     description: "Plan was downgraded mid-cycle."
   }
 
   dimension: churn_flag {
     type:        yesno
-    sql:         ${TABLE}.churn_flag ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.churn_flag AS BOOL), FALSE) ;;
     label:       "Did Churn?"
     description: "True if this subscription ended (churned)."
   }
 
   dimension: auto_renew_flag {
     type:        yesno
-    sql:         ${TABLE}.auto_renew_flag ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.auto_renew_flag AS BOOL), FALSE) ;;
     label:       "Auto-Renew Enabled?"
     description: "Whether auto-renewal is enabled (~80% true)."
   }
@@ -198,9 +198,9 @@ view: ravenstack_subscriptions {
   dimension: plan_change_type {
     type:        string
     sql:         CASE
-                   WHEN ${TABLE}.upgrade_flag   = TRUE AND ${TABLE}.downgrade_flag = FALSE THEN 'Upgrade Only'
-                   WHEN ${TABLE}.downgrade_flag = TRUE AND ${TABLE}.upgrade_flag   = FALSE THEN 'Downgrade Only'
-                   WHEN ${TABLE}.upgrade_flag   = TRUE AND ${TABLE}.downgrade_flag = TRUE  THEN 'Both'
+                   WHEN COALESCE(SAFE_CAST(${TABLE}.upgrade_flag   AS BOOL), FALSE) AND NOT COALESCE(SAFE_CAST(${TABLE}.downgrade_flag AS BOOL), FALSE) THEN 'Upgrade Only'
+                   WHEN COALESCE(SAFE_CAST(${TABLE}.downgrade_flag AS BOOL), FALSE) AND NOT COALESCE(SAFE_CAST(${TABLE}.upgrade_flag   AS BOOL), FALSE) THEN 'Downgrade Only'
+                   WHEN COALESCE(SAFE_CAST(${TABLE}.upgrade_flag   AS BOOL), FALSE) AND COALESCE(SAFE_CAST(${TABLE}.downgrade_flag     AS BOOL), FALSE) THEN 'Both'
                    ELSE 'No Change'
                  END ;;
     label:       "Plan Change Type"
@@ -333,7 +333,7 @@ view: ravenstack_subscriptions {
   measure: auto_renew_rate {
     type:        number
     sql:         SAFE_DIVIDE(
-                   COUNTIF(${TABLE}.auto_renew_flag = TRUE),
+                   COUNTIF(COALESCE(SAFE_CAST(${TABLE}.auto_renew_flag AS BOOL), FALSE)),
                    NULLIF(COUNT(*), 0)
                  ) ;;
     label:       "Auto-Renew Rate"

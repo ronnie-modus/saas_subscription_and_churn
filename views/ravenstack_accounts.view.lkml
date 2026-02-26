@@ -1,4 +1,4 @@
-view: ravenstack_accounts {
+view: accounts {
   sql_table_name: `saas_subscription_and_churn_analytics_dataset_demo.ravenstack_accounts` ;;
 
   # -------------------------------------------------------
@@ -146,14 +146,14 @@ view: ravenstack_accounts {
 
   dimension: is_trial {
     type:        yesno
-    sql:         ${TABLE}.is_trial ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.is_trial AS BOOL), FALSE) ;;
     label:       "Is Trial?"
     description: "Whether the account is currently in a trial."
   }
 
   dimension: churn_flag {
     type:        yesno
-    sql:         ${TABLE}.churn_flag ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.churn_flag AS BOOL), FALSE) ;;
     label:       "Has Churned?"
     description: "True if this account has churned at any point."
   }
@@ -161,8 +161,8 @@ view: ravenstack_accounts {
   dimension: account_status {
     type:        string
     sql:         CASE
-                   WHEN ${TABLE}.churn_flag = TRUE THEN 'Churned'
-                   WHEN ${TABLE}.is_trial  = TRUE THEN 'Trial'
+                   WHEN COALESCE(SAFE_CAST(${TABLE}.churn_flag AS BOOL), FALSE) THEN 'Churned'
+                   WHEN COALESCE(SAFE_CAST(${TABLE}.is_trial  AS BOOL), FALSE) THEN 'Trial'
                    ELSE 'Active'
                  END ;;
     label:       "Account Status"

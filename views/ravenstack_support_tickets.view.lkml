@@ -1,4 +1,4 @@
-view: ravenstack_support_tickets {
+view: support_tickets {
   sql_table_name: `saas_subscription_and_churn_analytics_dataset_demo.ravenstack_support_tickets` ;;
 
   # -------------------------------------------------------
@@ -82,7 +82,7 @@ view: ravenstack_support_tickets {
 
   dimension: escalation_flag {
     type:        yesno
-    sql:         ${TABLE}.escalation_flag ;;
+    sql:         COALESCE(SAFE_CAST(${TABLE}.escalation_flag AS BOOL), FALSE) ;;
     label:       "Was Escalated?"
     description: "True if the ticket was escalated."
   }
@@ -211,7 +211,7 @@ view: ravenstack_support_tickets {
   measure: escalation_rate {
     type:        number
     sql:         SAFE_DIVIDE(
-                   COUNTIF(${TABLE}.escalation_flag = TRUE),
+                   COUNTIF(COALESCE(SAFE_CAST(${TABLE}.escalation_flag AS BOOL), FALSE)),
                    NULLIF(COUNT(*), 0)
                  ) ;;
     label:       "Escalation Rate"

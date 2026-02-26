@@ -6,6 +6,7 @@ include: "/views/*.view.lkml"
 # EXPLORES
 ########################################
 
+
 # --- Primary Explore: Accounts (hub of the star schema) ---
 explore: accounts {
   label:       "Accounts & Churn"
@@ -36,6 +37,12 @@ explore: feature_usage {
   label:       "Feature Usage"
   description: "Granular product engagement data.
   Best for feature adoption, beta tracking, error analysis, and usage trends."
+
+  join: feature_map {
+    type:         left_outer
+    sql_on:       ${feature_usage.feature_name} = ${feature_map.feature_id} ;;
+    relationship: many_to_one
+  }
 
   join: subscriptions {
     type:         left_outer
@@ -83,5 +90,11 @@ explore: subscriptions {
     type:         left_outer
     sql_on:       ${subscriptions.subscription_id} = ${feature_usage.subscription_id} ;;
     relationship: one_to_many
+  }
+
+  join: feature_map {
+    type:         left_outer
+    sql_on:       ${feature_usage.feature_name} = ${feature_map.feature_id} ;;
+    relationship: many_to_one
   }
 }

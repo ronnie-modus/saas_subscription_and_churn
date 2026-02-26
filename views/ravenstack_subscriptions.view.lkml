@@ -1,7 +1,7 @@
 view: subscriptions {
   sql_table_name: `saas_subscription_and_churn_analytics_dataset_demo.ravenstack_subscriptions` ;;
 
-  # -------------------------------------------------------
+# -------------------------------------------------------
   # PRIMARY KEY
   # -------------------------------------------------------
 
@@ -34,7 +34,7 @@ view: subscriptions {
     type:       time
     timeframes: [raw, date, week, month, quarter, year, month_num]
     datatype:   date
-    sql:        ${TABLE}.start_date ;;
+    sql:        SAFE_CAST(${TABLE}.start_date AS DATE) ;;
     label:      "Subscription Start"
     description: "Date the subscription began."
   }
@@ -43,7 +43,7 @@ view: subscriptions {
     type:       time
     timeframes: [raw, date, week, month, quarter, year, month_num]
     datatype:   date
-    sql:        ${TABLE}.end_date ;;
+    sql:        SAFE_CAST(${TABLE}.end_date AS DATE) ;;
     label:      "Subscription End"
     description: "Date the subscription ended. NULL if still active."
   }
@@ -58,8 +58,8 @@ view: subscriptions {
   dimension: subscription_length_days {
     type:        number
     sql:         DATE_DIFF(
-                   COALESCE(${TABLE}.end_date, CURRENT_DATE()),
-                   ${TABLE}.start_date,
+                   COALESCE(SAFE_CAST(${TABLE}.end_date AS DATE), CURRENT_DATE()),
+                   SAFE_CAST(${TABLE}.start_date AS DATE),
                    DAY
                  ) ;;
     label:       "Subscription Length (Days)"
@@ -81,7 +81,7 @@ view: subscriptions {
 
   dimension: start_cohort_month {
     type:        string
-    sql:         FORMAT_DATE('%Y-%m', ${TABLE}.start_date) ;;
+    sql:         FORMAT_DATE('%Y-%m', SAFE_CAST(${TABLE}.start_date AS DATE)) ;;
     label:       "Start Cohort (Month)"
     description: "YYYY-MM cohort based on subscription start date."
   }
@@ -111,7 +111,7 @@ view: subscriptions {
 
   dimension: seats {
     type:        number
-    sql:         ${TABLE}.seats ;;
+    sql:         SAFE_CAST(${TABLE}.seats AS INT64) ;;
     label:       "Seats"
     description: "Number of licensed seats on this subscription."
   }
@@ -129,7 +129,7 @@ view: subscriptions {
 
   dimension: mrr_amount {
     type:        number
-    sql:         ${TABLE}.mrr_amount ;;
+    sql:         SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64) ;;
     label:       "MRR Amount"
     description: "Monthly Recurring Revenue for this subscription."
     value_format_name: usd
@@ -137,7 +137,7 @@ view: subscriptions {
 
   dimension: arr_amount {
     type:        number
-    sql:         ${TABLE}.arr_amount ;;
+    sql:         SAFE_CAST(${TABLE}.arr_amount AS FLOAT64) ;;
     label:       "ARR Amount"
     description: "Annual Recurring Revenue for this subscription."
     value_format_name: usd
@@ -146,10 +146,10 @@ view: subscriptions {
   dimension: mrr_tier {
     type:        string
     sql:         CASE
-                   WHEN ${TABLE}.mrr_amount < 100   THEN '$0-$99'
-                   WHEN ${TABLE}.mrr_amount < 500   THEN '$100-$499'
-                   WHEN ${TABLE}.mrr_amount < 1000  THEN '$500-$999'
-                   WHEN ${TABLE}.mrr_amount < 5000  THEN '$1k-$4.9k'
+                   WHEN SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64) < 100   THEN '$0-$99'
+                   WHEN SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64) < 500   THEN '$100-$499'
+                   WHEN SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64) < 1000  THEN '$500-$999'
+                   WHEN SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64) < 5000  THEN '$1k-$4.9k'
                    ELSE '$5k+'
                  END ;;
     label:       "MRR Tier"

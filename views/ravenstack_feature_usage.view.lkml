@@ -1,7 +1,7 @@
 view: feature_usage {
   sql_table_name: `saas_subscription_and_churn_analytics_dataset_demo.ravenstack_feature_usage` ;;
 
-  # -------------------------------------------------------
+# -------------------------------------------------------
   # PRIMARY KEY
   # -------------------------------------------------------
 
@@ -34,7 +34,7 @@ view: feature_usage {
     type:       time
     timeframes: [raw, date, week, month, quarter, year, day_of_week, month_num]
     datatype:   date
-    sql:        ${TABLE}.usage_date ;;
+    sql:        SAFE_CAST(${TABLE}.usage_date AS DATE) ;;
     label:      "Usage"
     description: "Date when this feature usage event occurred."
   }
@@ -73,7 +73,7 @@ view: feature_usage {
 
   dimension: usage_count {
     type:        number
-    sql:         ${TABLE}.usage_count ;;
+    sql:         SAFE_CAST(${TABLE}.usage_count AS INT64) ;;
     label:       "Usage Count"
     description: "Number of times this feature was triggered in the event."
   }
@@ -81,10 +81,10 @@ view: feature_usage {
   dimension: usage_count_tier {
     type:        string
     sql:         CASE
-                   WHEN ${TABLE}.usage_count = 0      THEN '0 (No Usage)'
-                   WHEN ${TABLE}.usage_count BETWEEN 1 AND 5   THEN '1-5'
-                   WHEN ${TABLE}.usage_count BETWEEN 6 AND 20  THEN '6-20'
-                   WHEN ${TABLE}.usage_count BETWEEN 21 AND 100 THEN '21-100'
+                   WHEN SAFE_CAST(${TABLE}.usage_count AS INT64) = 0                          THEN '0 (No Usage)'
+                   WHEN SAFE_CAST(${TABLE}.usage_count AS INT64) BETWEEN 1 AND 5             THEN '1-5'
+                   WHEN SAFE_CAST(${TABLE}.usage_count AS INT64) BETWEEN 6 AND 20            THEN '6-20'
+                   WHEN SAFE_CAST(${TABLE}.usage_count AS INT64) BETWEEN 21 AND 100          THEN '21-100'
                    ELSE '100+'
                  END ;;
     label:       "Usage Count Tier"
@@ -93,7 +93,7 @@ view: feature_usage {
 
   dimension: usage_duration_secs {
     type:        number
-    sql:         ${TABLE}.usage_duration_secs ;;
+    sql:         SAFE_CAST(${TABLE}.usage_duration_secs AS INT64) ;;
     label:       "Usage Duration (secs)"
     description: "Time spent on this feature in seconds."
     hidden:      yes
@@ -101,7 +101,7 @@ view: feature_usage {
 
   dimension: error_count {
     type:        number
-    sql:         ${TABLE}.error_count ;;
+    sql:         SAFE_CAST(${TABLE}.error_count AS INT64) ;;
     label:       "Error Count"
     description: "Number of errors logged during this usage event."
     hidden:      yes
@@ -109,7 +109,7 @@ view: feature_usage {
 
   dimension: has_errors {
     type:        yesno
-    sql:         ${TABLE}.error_count > 0 ;;
+    sql:         SAFE_CAST(${TABLE}.error_count AS INT64) > 0 ;;
     label:       "Has Errors?"
     description: "True if any errors were logged during this usage event."
   }
@@ -221,7 +221,7 @@ view: feature_usage {
   measure: error_rate {
     type:        number
     sql:         SAFE_DIVIDE(
-                   COUNTIF(${TABLE}.error_count > 0),
+                   COUNTIF(SAFE_CAST(${TABLE}.error_count AS INT64) > 0),
                    NULLIF(COUNT(*), 0)
                  ) ;;
     label:       "Error Rate"

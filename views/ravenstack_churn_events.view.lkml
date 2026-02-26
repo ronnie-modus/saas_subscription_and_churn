@@ -1,6 +1,7 @@
 view: churn_events {
   sql_table_name: `saas_subscription_and_churn_analytics_dataset_demo.ravenstack_churn_events` ;;
 
+
   # -------------------------------------------------------
   # PRIMARY KEY
   # -------------------------------------------------------
@@ -34,14 +35,14 @@ view: churn_events {
     type:       time
     timeframes: [raw, date, week, month, quarter, year, month_num]
     datatype:   date
-    sql:        ${TABLE}.churn_date ;;
+    sql:        SAFE_CAST(${TABLE}.churn_date AS DATE) ;;
     label:      "Churn"
     description: "Date the account churned."
   }
 
   dimension: churn_cohort_month {
     type:        string
-    sql:         FORMAT_DATE('%Y-%m', ${TABLE}.churn_date) ;;
+    sql:         FORMAT_DATE('%Y-%m', SAFE_CAST(${TABLE}.churn_date AS DATE)) ;;
     label:       "Churn Cohort (Month)"
     description: "YYYY-MM cohort of the churn date."
   }
@@ -93,7 +94,7 @@ view: churn_events {
 
   dimension: refund_amount_usd {
     type:        number
-    sql:         ${TABLE}.refund_amount_usd ;;
+    sql:         SAFE_CAST(${TABLE}.refund_amount_usd AS FLOAT64) ;;
     label:       "Refund Amount (USD)"
     description: "Refund or credit issued at churn. $0 for most (~75%)."
     value_format_name: usd
@@ -101,7 +102,7 @@ view: churn_events {
 
   dimension: was_refunded {
     type:        yesno
-    sql:         ${TABLE}.refund_amount_usd > 0 ;;
+    sql:         SAFE_CAST(${TABLE}.refund_amount_usd AS FLOAT64) > 0 ;;
     label:       "Was Refunded?"
     description: "True if a refund or credit was issued (~25% of churn events)."
   }
@@ -109,10 +110,10 @@ view: churn_events {
   dimension: refund_tier {
     type:        string
     sql:         CASE
-                   WHEN ${TABLE}.refund_amount_usd = 0                  THEN 'No Refund'
-                   WHEN ${TABLE}.refund_amount_usd BETWEEN 0.01 AND 99  THEN '$1-$99'
-                   WHEN ${TABLE}.refund_amount_usd BETWEEN 100 AND 499  THEN '$100-$499'
-                   WHEN ${TABLE}.refund_amount_usd >= 500               THEN '$500+'
+                   WHEN SAFE_CAST(${TABLE}.refund_amount_usd AS FLOAT64) = 0                   THEN 'No Refund'
+                   WHEN SAFE_CAST(${TABLE}.refund_amount_usd AS FLOAT64) BETWEEN 0.01 AND 99   THEN '$1-$99'
+                   WHEN SAFE_CAST(${TABLE}.refund_amount_usd AS FLOAT64) BETWEEN 100 AND 499   THEN '$100-$499'
+                   WHEN SAFE_CAST(${TABLE}.refund_amount_usd AS FLOAT64) >= 500                THEN '$500+'
                  END ;;
     label:       "Refund Tier"
     description: "Bucketed refund amount."

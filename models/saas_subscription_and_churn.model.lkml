@@ -6,7 +6,6 @@ include: "/views/*.view.lkml"
 # EXPLORES
 ########################################
 
-
 # --- Primary Explore: Accounts (hub of the star schema) ---
 explore: accounts {
   label:       "Accounts & Churn"

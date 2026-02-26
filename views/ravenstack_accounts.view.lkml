@@ -1,6 +1,7 @@
 view: accounts {
   sql_table_name: `saas_subscription_and_churn_analytics_dataset_demo.ravenstack_accounts` ;;
 
+
   # -------------------------------------------------------
   # PRIMARY KEY
   # -------------------------------------------------------
@@ -52,7 +53,7 @@ view: accounts {
     type:        time
     timeframes:  [raw, date, week, month, quarter, year, month_num, day_of_week]
     datatype:    date
-    sql:         ${TABLE}.signup_date ;;
+    sql:         SAFE_CAST(${TABLE}.signup_date AS DATE) ;;
     label:       "Signup"
     description: "Date the account was created."
   }
@@ -80,7 +81,7 @@ view: accounts {
 
   dimension: signup_cohort_month {
     type:        string
-    sql:         FORMAT_DATE('%Y-%m', ${signup_date}) ;;
+    sql:         FORMAT_DATE('%Y-%m', SAFE_CAST(${TABLE}.signup_date AS DATE)) ;;
     label:       "Signup Cohort (Month)"
     description: "YYYY-MM cohort based on signup date."
   }
@@ -111,7 +112,7 @@ view: accounts {
 
   dimension: seats {
     type:        number
-    sql:         ${TABLE}.seats ;;
+    sql:         SAFE_CAST(${TABLE}.seats AS INT64) ;;
     label:       "Seats"
     description: "Number of licensed user seats on the account."
   }
@@ -119,10 +120,10 @@ view: accounts {
   dimension: seats_bucket {
     type:        string
     sql:         CASE
-                   WHEN ${TABLE}.seats = 1        THEN '1 seat'
-                   WHEN ${TABLE}.seats BETWEEN 2 AND 5   THEN '2-5 seats'
-                   WHEN ${TABLE}.seats BETWEEN 6 AND 20  THEN '6-20 seats'
-                   WHEN ${TABLE}.seats BETWEEN 21 AND 100 THEN '21-100 seats'
+                   WHEN SAFE_CAST(${TABLE}.seats AS INT64) = 1                           THEN '1 seat'
+                   WHEN SAFE_CAST(${TABLE}.seats AS INT64) BETWEEN 2 AND 5              THEN '2-5 seats'
+                   WHEN SAFE_CAST(${TABLE}.seats AS INT64) BETWEEN 6 AND 20             THEN '6-20 seats'
+                   WHEN SAFE_CAST(${TABLE}.seats AS INT64) BETWEEN 21 AND 100           THEN '21-100 seats'
                    ELSE '100+ seats'
                  END ;;
     label:       "Seats Bucket"

@@ -1,7 +1,7 @@
 view: support_tickets {
   sql_table_name: `saas_subscription_and_churn_analytics_dataset_demo.ravenstack_support_tickets` ;;
 
-  # -------------------------------------------------------
+ # -------------------------------------------------------
   # PRIMARY KEY
   # -------------------------------------------------------
 
@@ -34,7 +34,7 @@ view: support_tickets {
     type:       time
     timeframes: [raw, time, date, week, month, quarter, year, hour_of_day, day_of_week]
     datatype:   datetime
-    sql:        ${TABLE}.submitted_at ;;
+    sql:        SAFE_CAST(${TABLE}.submitted_at AS DATETIME) ;;
     label:      "Submitted"
     description: "Date and time the ticket was opened."
   }
@@ -43,7 +43,7 @@ view: support_tickets {
     type:       time
     timeframes: [raw, time, date, week, month, quarter, year]
     datatype:   datetime
-    sql:        ${TABLE}.closed_at ;;
+    sql:        SAFE_CAST(${TABLE}.closed_at AS DATETIME) ;;
     label:      "Closed"
     description: "Date and time the ticket was resolved."
   }
@@ -93,7 +93,7 @@ view: support_tickets {
 
   dimension: resolution_time_hours {
     type:        number
-    sql:         ${TABLE}.resolution_time_hours ;;
+    sql:         SAFE_CAST(${TABLE}.resolution_time_hours AS FLOAT64) ;;
     label:       "Resolution Time (Hours)"
     description: "Total hours from open to close."
   }
@@ -101,11 +101,11 @@ view: support_tickets {
   dimension: resolution_time_bucket {
     type:        string
     sql:         CASE
-                   WHEN ${TABLE}.resolution_time_hours < 1   THEN '< 1 hour'
-                   WHEN ${TABLE}.resolution_time_hours < 4   THEN '1-4 hours'
-                   WHEN ${TABLE}.resolution_time_hours < 24  THEN '4-24 hours'
-                   WHEN ${TABLE}.resolution_time_hours < 72  THEN '1-3 days'
-                   WHEN ${TABLE}.resolution_time_hours < 168 THEN '3-7 days'
+                   WHEN SAFE_CAST(${TABLE}.resolution_time_hours AS FLOAT64) < 1   THEN '< 1 hour'
+                   WHEN SAFE_CAST(${TABLE}.resolution_time_hours AS FLOAT64) < 4   THEN '1-4 hours'
+                   WHEN SAFE_CAST(${TABLE}.resolution_time_hours AS FLOAT64) < 24  THEN '4-24 hours'
+                   WHEN SAFE_CAST(${TABLE}.resolution_time_hours AS FLOAT64) < 72  THEN '1-3 days'
+                   WHEN SAFE_CAST(${TABLE}.resolution_time_hours AS FLOAT64) < 168 THEN '3-7 days'
                    ELSE '7+ days'
                  END ;;
     label:       "Resolution Time Bucket"
@@ -115,7 +115,7 @@ view: support_tickets {
 
   dimension: first_response_time_minutes {
     type:        number
-    sql:         ${TABLE}.first_response_time_minutes ;;
+    sql:         SAFE_CAST(${TABLE}.first_response_time_minutes AS INT64) ;;
     label:       "First Response Time (Mins)"
     description: "Minutes until the first agent response."
   }
@@ -123,11 +123,11 @@ view: support_tickets {
   dimension: first_response_time_bucket {
     type:        string
     sql:         CASE
-                   WHEN ${TABLE}.first_response_time_minutes < 5    THEN '< 5 mins'
-                   WHEN ${TABLE}.first_response_time_minutes < 30   THEN '5-30 mins'
-                   WHEN ${TABLE}.first_response_time_minutes < 60   THEN '30-60 mins'
-                   WHEN ${TABLE}.first_response_time_minutes < 240  THEN '1-4 hours'
-                   WHEN ${TABLE}.first_response_time_minutes < 1440 THEN '4-24 hours'
+                   WHEN SAFE_CAST(${TABLE}.first_response_time_minutes AS INT64) < 5    THEN '< 5 mins'
+                   WHEN SAFE_CAST(${TABLE}.first_response_time_minutes AS INT64) < 30   THEN '5-30 mins'
+                   WHEN SAFE_CAST(${TABLE}.first_response_time_minutes AS INT64) < 60   THEN '30-60 mins'
+                   WHEN SAFE_CAST(${TABLE}.first_response_time_minutes AS INT64) < 240  THEN '1-4 hours'
+                   WHEN SAFE_CAST(${TABLE}.first_response_time_minutes AS INT64) < 1440 THEN '4-24 hours'
                    ELSE '24+ hours'
                  END ;;
     label:       "First Response Time Bucket"
@@ -141,7 +141,7 @@ view: support_tickets {
 
   dimension: satisfaction_score {
     type:        number
-    sql:         ${TABLE}.satisfaction_score ;;
+    sql:         SAFE_CAST(${TABLE}.satisfaction_score AS INT64) ;;
     label:       "Satisfaction Score (1-5)"
     description: "Customer satisfaction rating 1-5. NULL if no response."
   }
@@ -149,12 +149,12 @@ view: support_tickets {
   dimension: satisfaction_tier {
     type:        string
     sql:         CASE
-                   WHEN ${TABLE}.satisfaction_score IS NULL THEN 'No Response'
-                   WHEN ${TABLE}.satisfaction_score = 5     THEN '5 - Excellent'
-                   WHEN ${TABLE}.satisfaction_score = 4     THEN '4 - Good'
-                   WHEN ${TABLE}.satisfaction_score = 3     THEN '3 - Neutral'
-                   WHEN ${TABLE}.satisfaction_score = 2     THEN '2 - Poor'
-                   WHEN ${TABLE}.satisfaction_score = 1     THEN '1 - Very Poor'
+                   WHEN SAFE_CAST(${TABLE}.satisfaction_score AS INT64) IS NULL THEN 'No Response'
+                   WHEN SAFE_CAST(${TABLE}.satisfaction_score AS INT64) = 5     THEN '5 - Excellent'
+                   WHEN SAFE_CAST(${TABLE}.satisfaction_score AS INT64) = 4     THEN '4 - Good'
+                   WHEN SAFE_CAST(${TABLE}.satisfaction_score AS INT64) = 3     THEN '3 - Neutral'
+                   WHEN SAFE_CAST(${TABLE}.satisfaction_score AS INT64) = 2     THEN '2 - Poor'
+                   WHEN SAFE_CAST(${TABLE}.satisfaction_score AS INT64) = 1     THEN '1 - Very Poor'
                  END ;;
     label:       "Satisfaction Tier"
     description: "Labeled satisfaction score tier."
@@ -163,14 +163,14 @@ view: support_tickets {
 
   dimension: is_satisfied {
     type:        yesno
-    sql:         ${TABLE}.satisfaction_score >= 4 ;;
+    sql:         SAFE_CAST(${TABLE}.satisfaction_score AS INT64) >= 4 ;;
     label:       "Is Satisfied? (Score ≥ 4)"
     description: "True if satisfaction score is 4 or 5."
   }
 
   dimension: is_dissatisfied {
     type:        yesno
-    sql:         ${TABLE}.satisfaction_score <= 2 ;;
+    sql:         SAFE_CAST(${TABLE}.satisfaction_score AS INT64) <= 2 ;;
     label:       "Is Dissatisfied? (Score ≤ 2)"
     description: "True if satisfaction score is 1 or 2."
   }
@@ -294,7 +294,7 @@ view: support_tickets {
   measure: satisfied_ticket_rate {
     type:        number
     sql:         SAFE_DIVIDE(
-                   COUNTIF(${TABLE}.satisfaction_score >= 4),
+                   COUNTIF(SAFE_CAST(${TABLE}.satisfaction_score AS INT64) >= 4),
                    NULLIF(COUNTIF(${TABLE}.satisfaction_score IS NOT NULL), 0)
                  ) ;;
     label:       "Satisfied Rate (Score ≥ 4)"
@@ -305,7 +305,7 @@ view: support_tickets {
   measure: dissatisfied_ticket_rate {
     type:        number
     sql:         SAFE_DIVIDE(
-                   COUNTIF(${TABLE}.satisfaction_score <= 2),
+                   COUNTIF(SAFE_CAST(${TABLE}.satisfaction_score AS INT64) <= 2),
                    NULLIF(COUNTIF(${TABLE}.satisfaction_score IS NOT NULL), 0)
                  ) ;;
     label:       "Dissatisfied Rate (Score ≤ 2)"

@@ -105,10 +105,13 @@
       name: waterfall_mrr
       model: saas_subscription_and_churn
       explore: subscriptions
-      type: looker_waterfall
+      type: looker_column
       fields: [accounts.plan_tier, subscriptions.total_mrr, subscriptions.churned_mrr]
       sorts: [subscriptions.total_mrr desc]
       limit: 10
+      note_state: expanded
+      note_display: below
+      note_text: "Demonstrates multi-measure column chart (looker_waterfall unavailable in this Looker version)"
       listen:
         plan_tier_dropdown: accounts.plan_tier
       row: 8
@@ -151,14 +154,24 @@
     # ============================================================
     # looker_boxplot — missing chart type
     # ============================================================
-    - title: "Resolution Time Distribution by Priority (Box Plot)"
+    - title: "Resolution Time Percentiles by Priority"
       name: boxplot_resolution
       model: saas_subscription_and_churn
       explore: support_tickets
-      type: looker_boxplot
-      fields: [support_tickets.priority, support_tickets.resolution_time_hours]
+      type: looker_column
+      fields: [
+        support_tickets.priority,
+        support_tickets.min_resolution_hours,
+        support_tickets.p25_resolution_time_hours,
+        support_tickets.median_resolution_time_hours,
+        support_tickets.p75_resolution_time_hours,
+        support_tickets.max_resolution_hours
+      ]
       sorts: [support_tickets.priority asc]
-      limit: 500
+      limit: 10
+      note_state: expanded
+      note_display: below
+      note_text: "Min / P25 / Median / P75 / Max — the 5 measures required for a box plot, shown as grouped columns"
       row: 16
       col: 12
       width: 12
@@ -271,11 +284,9 @@
     - title: "Earliest Signup"
       name: kpi_earliest_signup
       model: saas_subscription_and_churn
-      explore: accounts
+      explore: subscriptions
       type: single_value
-      fields: [accounts.earliest_signup]
-      filters:
-        accounts.signup_date: ""
+      fields: [subscriptions.min_start_date]
       row: 46
       col: 0
       width: 4
@@ -284,11 +295,9 @@
     - title: "Latest Signup"
       name: kpi_latest_signup
       model: saas_subscription_and_churn
-      explore: accounts
+      explore: subscriptions
       type: single_value
-      fields: [accounts.latest_signup]
-      filters:
-        accounts.signup_date: ""
+      fields: [subscriptions.max_start_date]
       row: 46
       col: 4
       width: 4

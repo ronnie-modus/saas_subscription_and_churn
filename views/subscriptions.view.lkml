@@ -425,6 +425,20 @@ view: subscriptions {
   # MISSING MEASURE TYPES: min, max, running_total
   # -------------------------------------------------------
 
+  measure: min_start_date {
+    type:        string
+    sql:         CAST(MIN(SAFE_CAST(${TABLE}.start_date AS DATE)) AS STRING) ;;
+    label:       "Earliest Start Date"
+    description: "The earliest subscription start date in the result set."
+  }
+
+  measure: max_start_date {
+    type:        string
+    sql:         CAST(MAX(SAFE_CAST(${TABLE}.start_date AS DATE)) AS STRING) ;;
+    label:       "Latest Start Date"
+    description: "The most recent subscription start date in the result set."
+  }
+
   measure: min_mrr {
     type:        min
     sql:         SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64) ;;

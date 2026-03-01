@@ -6,34 +6,26 @@
 
   filters:
 
+    # string_filter is not bound to any explore, so it can be
+    # listened to by both accounts.plan_tier AND conversion_funnel.plan_tier_filter
     - name: plan_tier
       title: "Plan Tier"
-      type: field_filter
+      type: string_filter
       default_value: ""
-      allow_multiple_values: true
+      allow_multiple_values: false
       required: false
-      ui_config:
-        type: button_toggles
-        display: inline
-      explore: accounts
-      field: accounts.plan_tier
 
     - name: industry
       title: "Industry"
-      type: field_filter
+      type: string_filter
       default_value: ""
-      allow_multiple_values: true
+      allow_multiple_values: false
       required: false
-      ui_config:
-        type: checkboxes
-        display: popover
-      explore: accounts
-      field: accounts.industry
 
   elements:
 
     # ============================================================
-    # REAL CONVERSION FUNNEL — with stage counts and drop-off
+    # REAL CONVERSION FUNNEL
     # ============================================================
 
     - title: "SaaS Conversion Funnel"
@@ -55,7 +47,7 @@
       width: 12
       height: 10
 
-    - title: "Stage Drop-off Rates"
+    - title: "Stage Conversion Rates"
       name: funnel_dropoff
       model: saas_subscription_and_churn
       explore: conversion_funnel
@@ -75,9 +67,7 @@
       height: 10
 
     # ============================================================
-    # HIERARCHY DRILL — Level 1: Plan + Industry counts
-    # Click a bar → drills to account summary using named set
-    # Click an account → drills to full account detail
+    # HIERARCHY DRILL
     # ============================================================
 
     - title: "Accounts by Plan Tier (Click to Drill Hierarchy)"
@@ -119,7 +109,7 @@
       height: 8
 
     # ============================================================
-    # FIELD GROUP DEMO — shows grouped fields in explore
+    # FIELD GROUP DEMO
     # ============================================================
 
     - title: "Account Identity Groups (Field Grouping Demo)"
@@ -149,7 +139,7 @@
       height: 8
 
     # ============================================================
-    # MINI-FUNNELS by Plan Tier — pivoted funnel comparison
+    # MINI-FUNNELS by segment
     # ============================================================
 
     - title: "Subscription Flow by Plan Tier"
@@ -162,7 +152,7 @@
       limit: 10
       note_state: expanded
       note_display: below
-      note_text: "Total → Trial → Churned breakdown per plan — a manual funnel by segment"
+      note_text: "Total → Trial → Churned breakdown per plan"
       listen:
         industry: accounts.industry
       row: 26

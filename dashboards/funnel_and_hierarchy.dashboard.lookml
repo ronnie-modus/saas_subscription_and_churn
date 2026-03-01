@@ -47,6 +47,9 @@
       note_state: expanded
       note_display: below
       note_text: "Stages: Signed Up → Trial → Paid → Active 90d → Upgraded → Churned"
+      listen:
+        plan_tier: conversion_funnel.plan_tier_filter
+        industry:  conversion_funnel.industry_filter
       row: 0
       col: 0
       width: 12
@@ -63,6 +66,9 @@
       note_state: expanded
       note_display: below
       note_text: "Conversion rate from the previous stage"
+      listen:
+        plan_tier: conversion_funnel.plan_tier_filter
+        industry:  conversion_funnel.industry_filter
       row: 0
       col: 12
       width: 12

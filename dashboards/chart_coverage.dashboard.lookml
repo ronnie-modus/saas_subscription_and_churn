@@ -274,6 +274,8 @@
       explore: accounts
       type: single_value
       fields: [accounts.earliest_signup]
+      filters:
+        accounts.signup_date: ""
       row: 46
       col: 0
       width: 4
@@ -285,6 +287,8 @@
       explore: accounts
       type: single_value
       fields: [accounts.latest_signup]
+      filters:
+        accounts.signup_date: ""
       row: 46
       col: 4
       width: 4

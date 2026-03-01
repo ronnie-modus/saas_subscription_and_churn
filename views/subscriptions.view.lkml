@@ -443,7 +443,7 @@ view: subscriptions {
 
   measure: running_total_mrr {
     type:        running_total
-    sql:         SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64) ;;
+    sql:         SUM(SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64)) ;;
     label:       "Running Total MRR"
     description: "Cumulative MRR — useful for cohort waterfall charts."
     value_format_name: usd_0

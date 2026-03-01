@@ -377,4 +377,76 @@ view: subscriptions {
         FORMAT_DATE('%Y-%m', SAFE_CAST(${TABLE}.start_date AS DATE))
       {% endif %} ;;
   }
+
+  # -------------------------------------------------------
+  # HTML DIMENSION
+  # -------------------------------------------------------
+
+  dimension: mrr_tier_html {
+    type:        string
+    sql:         ${TABLE}.mrr_amount ;;
+    label:       "MRR Tier (Badge)"
+    description: "MRR tier rendered as a color-coded HTML badge."
+    html:
+      {% assign val = value | plus: 0 %}
+      {% if val >= 5000 %}
+        <span style="background:#27ae60;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">$5k+</span>
+      {% elsif val >= 1000 %}
+        <span style="background:#2980b9;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">$1k-$5k</span>
+      {% elsif val >= 500 %}
+        <span style="background:#f39c12;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">$500-$1k</span>
+      {% else %}
+        <span style="background:#7f8c8d;color:white;padding:2px 8px;border-radius:10px;font-size:11px;"><$500</span>
+      {% endif %} ;;
+  }
+
+  # -------------------------------------------------------
+  # MEASURE WITH LINK (drill to explore)
+  # -------------------------------------------------------
+
+  measure: total_mrr_with_link {
+    type:        sum
+    sql:         SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64) ;;
+    label:       "Total MRR (with Drill Link)"
+    description: "Total MRR with a link to the subscription detail explore."
+    value_format_name: usd_0
+    filters:     [churn_flag: "No"]
+    link: {
+      label: "View Subscription Details"
+      url:   "/explore/saas_subscription_and_churn/subscriptions?fields=subscriptions.subscription_id,subscriptions.plan_tier,subscriptions.mrr_amount,subscriptions.billing_frequency&sorts=subscriptions.mrr_amount+desc"
+    }
+    link: {
+      label: "View in Dashboard"
+      url:   "/dashboards/lookml/saas_subscription_and_churn::revenue_overview"
+    }
+  }
+
+  # -------------------------------------------------------
+  # MISSING MEASURE TYPES: min, max, running_total
+  # -------------------------------------------------------
+
+  measure: min_mrr {
+    type:        min
+    sql:         SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64) ;;
+    label:       "Min MRR"
+    description: "Lowest MRR subscription in the result set."
+    value_format_name: usd
+  }
+
+  measure: max_mrr {
+    type:        max
+    sql:         SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64) ;;
+    label:       "Max MRR"
+    description: "Highest MRR subscription in the result set."
+    value_format_name: usd
+  }
+
+  measure: running_total_mrr {
+    type:        running_total
+    sql:         SAFE_CAST(${TABLE}.mrr_amount AS FLOAT64) ;;
+    label:       "Running Total MRR"
+    description: "Cumulative MRR — useful for cohort waterfall charts."
+    value_format_name: usd_0
+    direction:   "column"
+  }
 }

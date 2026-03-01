@@ -357,4 +357,24 @@ view: support_tickets {
         FORMAT_DATE('%Y-%m', SAFE_CAST(${TABLE}.submitted_at AS DATE))
       {% endif %} ;;
   }
+
+  # -------------------------------------------------------
+  # MISSING MEASURE TYPES: min, max
+  # -------------------------------------------------------
+
+  measure: min_resolution_hours {
+    type:        min
+    sql:         SAFE_CAST(${TABLE}.resolution_time_hours AS FLOAT64) ;;
+    label:       "Min Resolution Time (Hours)"
+    description: "Fastest ticket resolution in the result set."
+    value_format_name: decimal_1
+  }
+
+  measure: max_resolution_hours {
+    type:        max
+    sql:         SAFE_CAST(${TABLE}.resolution_time_hours AS FLOAT64) ;;
+    label:       "Max Resolution Time (Hours)"
+    description: "Slowest ticket resolution in the result set."
+    value_format_name: decimal_1
+  }
 }

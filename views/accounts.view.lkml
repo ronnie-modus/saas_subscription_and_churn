@@ -316,4 +316,202 @@ view: accounts {
         FORMAT_DATE('%Y-%m', SAFE_CAST(${TABLE}.signup_date AS DATE))
       {% endif %} ;;
   }
+
+  # -------------------------------------------------------
+  # HTML DIMENSION (custom rendering)
+  # -------------------------------------------------------
+
+  dimension: churn_flag_html {
+    type:        string
+    sql:         ${TABLE}.churn_flag ;;
+    label:       "Churn Status (Badge)"
+    description: "Churn flag rendered as a color-coded HTML badge."
+    html:
+      {% if value == "true" or value == "1" %}
+        <span style="background:#e74c3c;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">Churned</span>
+      {% else %}
+        <span style="background:#2ecc71;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">Active</span>
+      {% endif %} ;;
+  }
+
+  dimension: plan_tier_html {
+    type:        string
+    sql:         ${TABLE}.plan_tier ;;
+    label:       "Plan Tier (Badge)"
+    description: "Plan tier rendered as a color-coded HTML badge."
+    html:
+      {% if value == "Enterprise" %}
+        <span style="background:#8e44ad;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">{{ value }}</span>
+      {% elsif value == "Pro" %}
+        <span style="background:#2980b9;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">{{ value }}</span>
+      {% else %}
+        <span style="background:#7f8c8d;color:white;padding:2px 8px;border-radius:10px;font-size:11px;">{{ value }}</span>
+      {% endif %} ;;
+  }
+
+  # -------------------------------------------------------
+  # MISSING MEASURE TYPES: min, max, list, running_total
+  # -------------------------------------------------------
+
+  measure: earliest_signup {
+    type:        min
+    sql:         SAFE_CAST(${TABLE}.signup_date AS DATE) ;;
+    label:       "Earliest Signup Date"
+    description: "The earliest account signup date in the result set."
+  }
+
+  measure: latest_signup {
+    type:        max
+    sql:         SAFE_CAST(${TABLE}.signup_date AS DATE) ;;
+    label:       "Latest Signup Date"
+    description: "The most recent account signup date in the result set."
+  }
+
+  measure: industry_list {
+    type:            list
+    list_field:      industry
+    label:           "Industries (List)"
+    description:     "Comma-separated list of distinct industries in the result set."
+    suggest_explore: accounts
+    suggest_dimension: accounts.industry
+  }
+
+  # -------------------------------------------------------
+  # REQUIRED FIELDS — force context dimensions
+  # -------------------------------------------------------
+
+  measure: count_with_required {
+    type:           count
+    label:          "Account Count (requires Plan Tier)"
+    description:    "Account count — requires Plan Tier dimension to be in the query."
+    required_fields: [plan_tier]
+    hidden:         yes
+  }
+
+  # -------------------------------------------------------
+  # ACTION — trigger a webhook from a data cell
+  # -------------------------------------------------------
+
+  measure: trigger_crm_sync {
+    type:        count
+    label:       "Trigger CRM Sync"
+    description: "Demo data action — would trigger a CRM sync webhook in production."
+    hidden:      yes
+    action: {
+      label: "Sync to CRM"
+      url:   "https://example.com/crm-sync"
+      form_param: {
+        name:  "account_id"
+        type:  string
+        label: "Account ID"
+      }
+    }
+  }
+
+  # -------------------------------------------------------
+  # FIELD GROUPING — group_label organises the field picker
+  # -------------------------------------------------------
+
+  dimension: group_identity_name {
+    group_label:      "Identity"
+    group_item_label: "Name"
+    type:             string
+    sql:              ${TABLE}.account_name ;;
+    label:            "Account Name (Grouped)"
+    hidden:           yes
+  }
+
+  dimension: group_identity_industry {
+    group_label:      "Identity"
+    group_item_label: "Industry"
+    type:             string
+    sql:              ${TABLE}.industry ;;
+    label:            "Industry (Grouped)"
+    hidden:           yes
+  }
+
+  dimension: group_identity_country {
+    group_label:      "Identity"
+    group_item_label: "Country"
+    type:             string
+    sql:              ${TABLE}.country ;;
+    label:            "Country (Grouped)"
+    hidden:           yes
+  }
+
+  dimension: group_plan_tier {
+    group_label:      "Plan & Status"
+    group_item_label: "Plan Tier"
+    type:             string
+    sql:              ${TABLE}.plan_tier ;;
+    label:            "Plan Tier (Grouped)"
+    hidden:           yes
+  }
+
+  dimension: group_status {
+    group_label:      "Plan & Status"
+    group_item_label: "Account Status"
+    type:             string
+    sql:              CASE
+                        WHEN COALESCE(SAFE_CAST(${TABLE}.churn_flag AS BOOL), FALSE) THEN 'Churned'
+                        WHEN COALESCE(SAFE_CAST(${TABLE}.is_trial AS BOOL), FALSE)   THEN 'Trial'
+                        ELSE 'Active'
+                      END ;;
+    label:            "Account Status (Grouped)"
+    hidden:           yes
+  }
+
+  # -------------------------------------------------------
+  # NAMED SETS — reusable field lists for drill hierarchies
+  # -------------------------------------------------------
+
+  set: account_summary_fields {
+    fields: [
+      account_id,
+      account_name,
+      plan_tier,
+      industry,
+      country,
+      account_status,
+      seats
+    ]
+  }
+
+  set: account_detail_fields {
+    fields: [
+      account_id,
+      account_name,
+      plan_tier,
+      industry,
+      country,
+      signup_date,
+      account_status,
+      seats,
+      referral_source,
+      is_trial,
+      churn_flag
+    ]
+  }
+
+  # -------------------------------------------------------
+  # MEASURES USING NAMED SETS FOR DRILL HIERARCHY
+  # Level 1: click metric → account summary
+  # Level 2: click account → account detail
+  # -------------------------------------------------------
+
+  measure: count_with_hierarchy_drill {
+    type:        count
+    label:       "Total Accounts (Hierarchy Drill)"
+    description: "Click to drill: Plan Tier → Account Summary → Account Detail."
+    drill_fields: [plan_tier, industry, count, churn_rate, account_summary_fields*]
+  }
+
+  measure: churn_rate_with_hierarchy_drill {
+    type:        number
+    sql:         SAFE_DIVIDE(${count_churned}, NULLIF(${count}, 0)) ;;
+    label:       "Churn Rate (Hierarchy Drill)"
+    description: "Click to drill: Industry → Account Summary → Account Detail."
+    value_format_name: percent_2
+    drill_fields: [industry, plan_tier, count_churned, count, account_summary_fields*]
+  }
 }

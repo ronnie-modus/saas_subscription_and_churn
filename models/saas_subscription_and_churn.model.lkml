@@ -4,6 +4,16 @@ include: "/views/*.view.lkml"
 include: "/dashboards/*.dashboard"
 
 ########################################
+# DATAGROUP — cache policy
+########################################
+
+datagroup: daily_refresh {
+  sql_trigger: "SELECT CURRENT_DATE()" ;;
+  max_cache_age: "24 hours"
+  description:   "Refreshes once per day. Used by all explores and aggregate tables."
+}
+
+########################################
 # EXPLORES
 ########################################
 
@@ -11,6 +21,17 @@ include: "/dashboards/*.dashboard"
 explore: accounts {
   label:       "Accounts & Churn"
   description: "Customer accounts joined to subscriptions, churn events, and support tickets."
+
+  # always_filter: forces a default filter that users can change but not remove
+  always_filter: {
+    filters: [accounts.churn_flag: "Yes,No"]
+  }
+
+  # access_filter: restricts rows based on a user attribute (demo — attribute may not exist)
+  # access_filter: {
+  #   field: accounts.plan_tier
+  #   user_attribute: allowed_plan_tier
+  # }
 
   join: subscriptions {
     type:         left_outer
@@ -95,4 +116,10 @@ explore: subscriptions {
     sql_on:       ${feature_usage.feature_name} = ${feature_map.feature_id} ;;
     relationship: many_to_one
   }
+}
+
+# --- Conversion Funnel Explore ---
+explore: conversion_funnel {
+  label:       "Conversion Funnel"
+  description: "Staged conversion funnel from signup through trial, paid, retained, upgraded and churned."
 }

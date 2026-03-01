@@ -251,70 +251,69 @@ view: accounts {
     hidden:      yes
   }
 
+  # -------------------------------------------------------
+  # DYNAMIC PARAMETERS
+  # -------------------------------------------------------
 
-# -------------------------------------------------------
-# DYNAMIC PARAMETERS
-# -------------------------------------------------------
+  parameter: breakdown_by {
+    type:          string
+    label:         "Break Down By"
+    description:   "Switch the grouping dimension across all charts."
+    default_value: "plan_tier"
+    allowed_value: { label: "Plan Tier"       value: "plan_tier"       }
+    allowed_value: { label: "Industry"        value: "industry"        }
+    allowed_value: { label: "Referral Source" value: "referral_source" }
+    allowed_value: { label: "Country"         value: "country"         }
+    allowed_value: { label: "Account Status"  value: "account_status"  }
+    allowed_value: { label: "Seats Bucket"    value: "seats_bucket"    }
+  }
 
-parameter: breakdown_by {
-  type:          unquoted
-  label:         "Break Down By"
-  description:   "Switch the grouping dimension across all charts."
-  default_value: "plan_tier"
-  allowed_value: { label: "Plan Tier"       value: "plan_tier"       }
-  allowed_value: { label: "Industry"        value: "industry"        }
-  allowed_value: { label: "Referral Source" value: "referral_source" }
-  allowed_value: { label: "Country"         value: "country"         }
-  allowed_value: { label: "Account Status"  value: "account_status"  }
-  allowed_value: { label: "Seats Bucket"    value: "seats_bucket"    }
-}
-
-dimension: dynamic_breakdown {
-  type:                 string
-  label:                "Dynamic Breakdown"
-  description:          "Groups by whichever dimension is selected in the 'Break Down By' filter."
-  label_from_parameter: breakdown_by
-  sql:
-      {% if breakdown_by._parameter_value == 'plan_tier' %}        ${plan_tier}
-      {% elsif breakdown_by._parameter_value == 'industry' %}      ${industry}
-      {% elsif breakdown_by._parameter_value == 'referral_source' %} ${referral_source}
-      {% elsif breakdown_by._parameter_value == 'country' %}       ${country}
-      {% elsif breakdown_by._parameter_value == 'account_status' %} ${account_status}
-      {% elsif breakdown_by._parameter_value == 'seats_bucket' %}  ${seats_bucket}
+  dimension: dynamic_breakdown {
+    type:                 string
+    label:                "Dynamic Breakdown"
+    description:          "Groups by whichever dimension is selected in the 'Break Down By' filter."
+    label_from_parameter: breakdown_by
+    sql:
+      {% if breakdown_by._parameter_value == "'plan_tier'" %}        ${plan_tier}
+      {% elsif breakdown_by._parameter_value == "'industry'" %}      ${industry}
+      {% elsif breakdown_by._parameter_value == "'referral_source'" %} ${referral_source}
+      {% elsif breakdown_by._parameter_value == "'country'" %}       ${country}
+      {% elsif breakdown_by._parameter_value == "'account_status'" %} ${account_status}
+      {% elsif breakdown_by._parameter_value == "'seats_bucket'" %}  ${seats_bucket}
       {% else %}                                                    ${plan_tier}
       {% endif %} ;;
-}
+  }
 
-parameter: date_granularity {
-  type:          unquoted
-  label:         "Date Granularity"
-  description:   "Switch the time axis between day, week, month, quarter, or year."
-  default_value: "month"
-  allowed_value: { label: "Day"     value: "day"     }
-  allowed_value: { label: "Week"    value: "week"    }
-  allowed_value: { label: "Month"   value: "month"   }
-  allowed_value: { label: "Quarter" value: "quarter" }
-  allowed_value: { label: "Year"    value: "year"    }
-}
+  parameter: date_granularity {
+    type:          string
+    label:         "Date Granularity"
+    description:   "Switch the time axis between day, week, month, quarter, or year."
+    default_value: "month"
+    allowed_value: { label: "Day"     value: "day"     }
+    allowed_value: { label: "Week"    value: "week"    }
+    allowed_value: { label: "Month"   value: "month"   }
+    allowed_value: { label: "Quarter" value: "quarter" }
+    allowed_value: { label: "Year"    value: "year"    }
+  }
 
-dimension: dynamic_signup_date {
-  type:        string
-  label:       "Signup Date (Dynamic)"
-  description: "Signup date truncated to the chosen granularity."
-  sql:
-      {% if date_granularity._parameter_value == 'day' %}
+  dimension: dynamic_signup_date {
+    type:        string
+    label:       "Signup Date (Dynamic)"
+    description: "Signup date truncated to the chosen granularity."
+    sql:
+      {% if date_granularity._parameter_value == "'day'" %}
         CAST(SAFE_CAST(${TABLE}.signup_date AS DATE) AS STRING)
-      {% elsif date_granularity._parameter_value == 'week' %}
+      {% elsif date_granularity._parameter_value == "'week'" %}
         CAST(DATE_TRUNC(SAFE_CAST(${TABLE}.signup_date AS DATE), WEEK) AS STRING)
-      {% elsif date_granularity._parameter_value == 'month' %}
+      {% elsif date_granularity._parameter_value == "'month'" %}
         FORMAT_DATE('%Y-%m', SAFE_CAST(${TABLE}.signup_date AS DATE))
-      {% elsif date_granularity._parameter_value == 'quarter' %}
+      {% elsif date_granularity._parameter_value == "'quarter'" %}
         CONCAT(CAST(EXTRACT(YEAR FROM SAFE_CAST(${TABLE}.signup_date AS DATE)) AS STRING), '-Q',
                CAST(EXTRACT(QUARTER FROM SAFE_CAST(${TABLE}.signup_date AS DATE)) AS STRING))
-      {% elsif date_granularity._parameter_value == 'year' %}
+      {% elsif date_granularity._parameter_value == "'year'" %}
         CAST(EXTRACT(YEAR FROM SAFE_CAST(${TABLE}.signup_date AS DATE)) AS STRING)
       {% else %}
         FORMAT_DATE('%Y-%m', SAFE_CAST(${TABLE}.signup_date AS DATE))
       {% endif %} ;;
-}
+  }
 }

@@ -321,41 +321,40 @@ view: support_tickets {
     value_format_name: decimal_1
   }
 
+  # -------------------------------------------------------
+  # DYNAMIC PARAMETERS
+  # -------------------------------------------------------
 
-# -------------------------------------------------------
-# DYNAMIC PARAMETERS
-# -------------------------------------------------------
+  parameter: date_granularity {
+    type:          string
+    label:         "Date Granularity"
+    description:   "Switch the time axis between day, week, month, quarter, or year."
+    default_value: "month"
+    allowed_value: { label: "Day"     value: "day"     }
+    allowed_value: { label: "Week"    value: "week"    }
+    allowed_value: { label: "Month"   value: "month"   }
+    allowed_value: { label: "Quarter" value: "quarter" }
+    allowed_value: { label: "Year"    value: "year"    }
+  }
 
-parameter: date_granularity {
-  type:          unquoted
-  label:         "Date Granularity"
-  description:   "Switch the time axis between day, week, month, quarter, or year."
-  default_value: "month"
-  allowed_value: { label: "Day"     value: "day"     }
-  allowed_value: { label: "Week"    value: "week"    }
-  allowed_value: { label: "Month"   value: "month"   }
-  allowed_value: { label: "Quarter" value: "quarter" }
-  allowed_value: { label: "Year"    value: "year"    }
-}
-
-dimension: dynamic_submitted_date {
-  type:        string
-  label:       "Submitted Date (Dynamic)"
-  description: "Ticket submitted date truncated to the chosen granularity."
-  sql:
-      {% if date_granularity._parameter_value == 'day' %}
+  dimension: dynamic_submitted_date {
+    type:        string
+    label:       "Submitted Date (Dynamic)"
+    description: "Ticket submitted date truncated to the chosen granularity."
+    sql:
+      {% if date_granularity._parameter_value == "'day'" %}
         CAST(SAFE_CAST(${TABLE}.submitted_at AS DATE) AS STRING)
-      {% elsif date_granularity._parameter_value == 'week' %}
+      {% elsif date_granularity._parameter_value == "'week'" %}
         CAST(DATE_TRUNC(SAFE_CAST(${TABLE}.submitted_at AS DATE), WEEK) AS STRING)
-      {% elsif date_granularity._parameter_value == 'month' %}
+      {% elsif date_granularity._parameter_value == "'month'" %}
         FORMAT_DATE('%Y-%m', SAFE_CAST(${TABLE}.submitted_at AS DATE))
-      {% elsif date_granularity._parameter_value == 'quarter' %}
+      {% elsif date_granularity._parameter_value == "'quarter'" %}
         CONCAT(CAST(EXTRACT(YEAR FROM SAFE_CAST(${TABLE}.submitted_at AS DATE)) AS STRING), '-Q',
                CAST(EXTRACT(QUARTER FROM SAFE_CAST(${TABLE}.submitted_at AS DATE)) AS STRING))
-      {% elsif date_granularity._parameter_value == 'year' %}
+      {% elsif date_granularity._parameter_value == "'year'" %}
         CAST(EXTRACT(YEAR FROM SAFE_CAST(${TABLE}.submitted_at AS DATE)) AS STRING)
       {% else %}
         FORMAT_DATE('%Y-%m', SAFE_CAST(${TABLE}.submitted_at AS DATE))
       {% endif %} ;;
-}
+  }
 }

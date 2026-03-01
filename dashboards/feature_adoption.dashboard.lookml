@@ -88,7 +88,7 @@
       model: saas_subscription_and_churn
       explore: feature_usage
       type: looker_bar
-      fields: [feature_usage.feature_name, feature_usage.count, feature_usage.total_errors]
+      fields: [feature_map.feature_display_name, feature_usage.count, feature_usage.total_errors]
       sorts: [feature_usage.count desc]
       limit: 15
       row: 3
@@ -114,7 +114,7 @@
       model: saas_subscription_and_churn
       explore: feature_usage
       type: looker_bar
-      fields: [feature_usage.feature_name, feature_usage.total_errors, feature_usage.error_rate]
+      fields: [feature_map.feature_display_name, feature_usage.total_errors, feature_usage.error_rate]
       sorts: [feature_usage.total_errors desc]
       limit: 15
       row: 13

@@ -362,6 +362,24 @@ view: support_tickets {
   # MISSING MEASURE TYPES: min, max
   # -------------------------------------------------------
 
+  measure: p25_resolution_time_hours {
+    type:        percentile
+    percentile:  25
+    sql:         ${resolution_time_hours} ;;
+    label:       "P25 Resolution Time (Hours)"
+    description: "25th percentile resolution time — lower quartile."
+    value_format_name: decimal_1
+  }
+
+  measure: p75_resolution_time_hours {
+    type:        percentile
+    percentile:  75
+    sql:         ${resolution_time_hours} ;;
+    label:       "P75 Resolution Time (Hours)"
+    description: "75th percentile resolution time — upper quartile."
+    value_format_name: decimal_1
+  }
+
   measure: min_resolution_hours {
     type:        min
     sql:         SAFE_CAST(${TABLE}.resolution_time_hours AS FLOAT64) ;;

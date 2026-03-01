@@ -355,14 +355,14 @@ view: accounts {
 
   measure: earliest_signup {
     type:        min
-    sql:         SAFE_CAST(${TABLE}.signup_date AS DATE) ;;
+    sql:         FORMAT_DATE('%Y-%m-%d', SAFE_CAST(${TABLE}.signup_date AS DATE)) ;;
     label:       "Earliest Signup Date"
     description: "The earliest account signup date in the result set."
   }
 
   measure: latest_signup {
     type:        max
-    sql:         SAFE_CAST(${TABLE}.signup_date AS DATE) ;;
+    sql:         FORMAT_DATE('%Y-%m-%d', SAFE_CAST(${TABLE}.signup_date AS DATE)) ;;
     label:       "Latest Signup Date"
     description: "The most recent account signup date in the result set."
   }

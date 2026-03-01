@@ -1,6 +1,7 @@
 connection: "bq_saas_subscription_and_churn"
 
 include: "/views/*.view.lkml"
+
 ########################################
 # EXPLORES
 ########################################

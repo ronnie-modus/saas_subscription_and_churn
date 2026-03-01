@@ -10,8 +10,7 @@ include: "/dashboards/*.dashboard"
 # --- Primary Explore: Accounts (hub of the star schema) ---
 explore: accounts {
   label:       "Accounts & Churn"
-  description: "Customer accounts joined to subscriptions, churn events, and support tickets.
-  Best for customer-level health, churn analysis, and revenue overview."
+  description: "Customer accounts joined to subscriptions, churn events, and support tickets."
 
   join: subscriptions {
     type:         left_outer
@@ -35,8 +34,7 @@ explore: accounts {
 # --- Feature Usage Explore ---
 explore: feature_usage {
   label:       "Feature Usage"
-  description: "Granular product engagement data.
-  Best for feature adoption, beta tracking, error analysis, and usage trends."
+  description: "Granular product engagement data."
 
   join: feature_map {
     type:         left_outer

@@ -30,7 +30,7 @@
   elements:
     - title: "Total Active MRR"
       name: total_mrr
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: subscriptions
       type: single_value
       fields: [subscriptions.total_mrr]
@@ -41,7 +41,7 @@
 
     - title: "Total Active ARR"
       name: total_arr
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: subscriptions
       type: single_value
       fields: [subscriptions.total_arr]
@@ -52,7 +52,7 @@
 
     - title: "Avg MRR per Subscription"
       name: avg_mrr
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: subscriptions
       type: single_value
       fields: [subscriptions.average_mrr]
@@ -63,7 +63,7 @@
 
     - title: "Subscription Churn Rate"
       name: sub_churn_rate
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: subscriptions
       type: single_value
       fields: [subscriptions.churn_rate]
@@ -74,7 +74,7 @@
 
     - title: "MRR by Plan Tier"
       name: mrr_by_plan
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: subscriptions
       type: looker_pie
       fields: [subscriptions.plan_tier, subscriptions.total_mrr]
@@ -87,7 +87,7 @@
 
     - title: "MRR Growth Over Time (by Plan)"
       name: mrr_over_time
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: subscriptions
       type: looker_area
       fields: [subscriptions.start_month, subscriptions.plan_tier, subscriptions.total_mrr]
@@ -101,7 +101,7 @@
 
     - title: "MRR by Billing Frequency"
       name: mrr_by_billing
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: subscriptions
       type: looker_column
       fields: [subscriptions.billing_frequency, subscriptions.total_mrr, subscriptions.count_active]
@@ -114,7 +114,7 @@
 
     - title: "Upgrades & Downgrades Over Time"
       name: plan_changes
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: subscriptions
       type: looker_line
       fields: [subscriptions.start_month, subscriptions.count_upgraded, subscriptions.count_downgraded]

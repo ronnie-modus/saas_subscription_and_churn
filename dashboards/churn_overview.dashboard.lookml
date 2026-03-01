@@ -42,7 +42,7 @@
   elements:
     - title: "Total Accounts"
       name: total_accounts
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: single_value
       fields: [accounts.count]
@@ -56,7 +56,7 @@
 
     - title: "Churned Accounts"
       name: churned_accounts
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: single_value
       fields: [accounts.count_churned]
@@ -70,7 +70,7 @@
 
     - title: "Account Churn Rate"
       name: account_churn_rate
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: single_value
       fields: [accounts.churn_rate]
@@ -84,7 +84,7 @@
 
     - title: "Churned MRR"
       name: churned_mrr
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: single_value
       fields: [subscriptions.churned_mrr]
@@ -98,7 +98,7 @@
 
     - title: "MRR Churn Rate"
       name: mrr_churn_rate
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: single_value
       fields: [subscriptions.mrr_churn_rate]
@@ -112,7 +112,7 @@
 
     - title: "Total Refunds at Churn"
       name: total_refunds
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: single_value
       fields: [churn_events.total_refund_amount]
@@ -126,7 +126,7 @@
 
     - title: "Churn Events by Reason"
       name: churn_by_reason
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: looker_pie
       fields: [churn_events.reason_code, churn_events.count]
@@ -139,7 +139,7 @@
 
     - title: "Monthly Churn Events Over Time"
       name: churn_over_time
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: looker_line
       fields: [churn_events.churn_month, churn_events.count]
@@ -154,7 +154,7 @@
 
     - title: "Churn Rate by Plan Tier"
       name: churn_by_plan
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: looker_bar
       fields: [accounts.plan_tier, accounts.count, accounts.count_churned, accounts.churn_rate]
@@ -167,7 +167,7 @@
 
     - title: "Churn Rate by Referral Source"
       name: churn_by_referral
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: looker_bar
       fields: [accounts.referral_source, accounts.count, accounts.count_churned, accounts.churn_rate]
@@ -180,7 +180,7 @@
 
     - title: "Pre-Churn Plan Signal Distribution"
       name: pre_churn_signals
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: looker_bar
       fields: [churn_events.pre_churn_signal, churn_events.count]
@@ -193,7 +193,7 @@
 
     - title: "Churn Rate by Industry"
       name: churn_by_industry
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: accounts
       type: looker_bar
       fields: [accounts.industry, accounts.count_churned, accounts.churn_rate]

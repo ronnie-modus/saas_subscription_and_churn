@@ -30,7 +30,7 @@
   elements:
     - title: "Total Usage Events"
       name: total_events
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: feature_usage
       type: single_value
       fields: [feature_usage.count]
@@ -41,7 +41,7 @@
 
     - title: "Distinct Features Used"
       name: distinct_features
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: feature_usage
       type: single_value
       fields: [feature_usage.count_distinct_features]
@@ -52,7 +52,7 @@
 
     - title: "Avg Usage Duration (mins)"
       name: avg_duration
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: feature_usage
       type: single_value
       fields: [feature_usage.average_usage_duration_mins]
@@ -63,7 +63,7 @@
 
     - title: "Error Rate"
       name: error_rate
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: feature_usage
       type: single_value
       fields: [feature_usage.error_rate]
@@ -74,7 +74,7 @@
 
     - title: "Beta Adoption Rate"
       name: beta_rate
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: feature_usage
       type: single_value
       fields: [feature_usage.beta_adoption_rate]
@@ -85,7 +85,7 @@
 
     - title: "Top Features by Usage Events"
       name: top_features
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: feature_usage
       type: looker_bar
       fields: [feature_usage.feature_name, feature_usage.count, feature_usage.total_errors]
@@ -98,7 +98,7 @@
 
     - title: "Usage Events Over Time"
       name: usage_over_time
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: feature_usage
       type: looker_line
       fields: [feature_usage.usage_week, feature_usage.count, feature_usage.total_errors]
@@ -111,7 +111,7 @@
 
     - title: "Top Error-Prone Features"
       name: error_features
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: feature_usage
       type: looker_bar
       fields: [feature_usage.feature_name, feature_usage.total_errors, feature_usage.error_rate]
@@ -124,7 +124,7 @@
 
     - title: "Beta vs GA Usage Split"
       name: beta_vs_ga
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: feature_usage
       type: looker_pie
       fields: [feature_usage.feature_type, feature_usage.count]

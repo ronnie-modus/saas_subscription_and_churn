@@ -30,7 +30,7 @@
   elements:
     - title: "Total Tickets"
       name: total_tickets
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: support_tickets
       type: single_value
       fields: [support_tickets.count]
@@ -41,7 +41,7 @@
 
     - title: "Escalation Rate"
       name: escalation_rate
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: support_tickets
       type: single_value
       fields: [support_tickets.escalation_rate]
@@ -52,7 +52,7 @@
 
     - title: "Avg CSAT Score"
       name: avg_csat
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: support_tickets
       type: single_value
       fields: [support_tickets.average_satisfaction_score]
@@ -63,7 +63,7 @@
 
     - title: "Avg Resolution Time (hrs)"
       name: avg_resolution
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: support_tickets
       type: single_value
       fields: [support_tickets.average_resolution_time_hours]
@@ -74,7 +74,7 @@
 
     - title: "P90 Resolution Time (hrs)"
       name: p90_resolution
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: support_tickets
       type: single_value
       fields: [support_tickets.p90_resolution_time_hours]
@@ -85,7 +85,7 @@
 
     - title: "CSAT Response Rate"
       name: csat_response
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: support_tickets
       type: single_value
       fields: [support_tickets.csat_response_rate]
@@ -96,7 +96,7 @@
 
     - title: "Tickets by Priority Over Time"
       name: tickets_over_time
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: support_tickets
       type: looker_area
       fields: [support_tickets.submitted_week, support_tickets.priority, support_tickets.count]
@@ -110,7 +110,7 @@
 
     - title: "CSAT Score Distribution"
       name: csat_distribution
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: support_tickets
       type: looker_column
       fields: [support_tickets.satisfaction_tier, support_tickets.count]
@@ -123,7 +123,7 @@
 
     - title: "Resolution Time Distribution"
       name: resolution_dist
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: support_tickets
       type: looker_column
       fields: [support_tickets.resolution_time_bucket, support_tickets.count]
@@ -136,7 +136,7 @@
 
     - title: "CSAT by Priority"
       name: csat_by_priority
-      model: ravenstack_saas
+      model: saas_subscription_and_churn
       explore: support_tickets
       type: looker_column
       fields: [support_tickets.priority, support_tickets.average_satisfaction_score, support_tickets.escalation_rate]

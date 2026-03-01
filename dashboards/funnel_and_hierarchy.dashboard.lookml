@@ -52,7 +52,7 @@
       model: saas_subscription_and_churn
       explore: conversion_funnel
       type: looker_column
-      fields: [conversion_funnel.stage_name, conversion_funnel.conversion_rate]
+      fields: [conversion_funnel.stage_name, conversion_funnel.stage_count, conversion_funnel.conversion_rate]
       sorts: [conversion_funnel.stage_name asc]
       limit: 10
       note_state: expanded

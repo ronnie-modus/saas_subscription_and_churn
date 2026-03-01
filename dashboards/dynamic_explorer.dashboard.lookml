@@ -14,7 +14,7 @@
     - name: breakdown_by
       title: "🔀 Break Down By"
       type: field_filter
-      default_value: "plan_tier"
+      default_value: "plantier"
       allow_multiple_values: false
       required: false
       ui_config:

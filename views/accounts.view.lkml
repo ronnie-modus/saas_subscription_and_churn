@@ -259,13 +259,13 @@ view: accounts {
     type:          string
     label:         "Break Down By"
     description:   "Switch the grouping dimension across all charts."
-    default_value: "plan_tier"
-    allowed_value: { label: "Plan Tier"       value: "plan_tier"       }
+    default_value: "plantier"
+    allowed_value: { label: "Plan Tier"       value: "plantier"       }
     allowed_value: { label: "Industry"        value: "industry"        }
-    allowed_value: { label: "Referral Source" value: "referral_source" }
+    allowed_value: { label: "Referral Source" value: "referral" }
     allowed_value: { label: "Country"         value: "country"         }
-    allowed_value: { label: "Account Status"  value: "account_status"  }
-    allowed_value: { label: "Seats Bucket"    value: "seats_bucket"    }
+    allowed_value: { label: "Account Status"  value: "status"  }
+    allowed_value: { label: "Seats Bucket"    value: "seats"    }
   }
 
   dimension: dynamic_breakdown {
@@ -274,12 +274,12 @@ view: accounts {
     description:          "Groups by whichever dimension is selected in the 'Break Down By' filter."
     label_from_parameter: breakdown_by
     sql:
-      {% if breakdown_by._parameter_value == "'plan_tier'" %}        ${plan_tier}
+      {% if breakdown_by._parameter_value == "'plantier'" %}        ${plan_tier}
       {% elsif breakdown_by._parameter_value == "'industry'" %}      ${industry}
-      {% elsif breakdown_by._parameter_value == "'referral_source'" %} ${referral_source}
+      {% elsif breakdown_by._parameter_value == "'referral'" %} ${referral_source}
       {% elsif breakdown_by._parameter_value == "'country'" %}       ${country}
-      {% elsif breakdown_by._parameter_value == "'account_status'" %} ${account_status}
-      {% elsif breakdown_by._parameter_value == "'seats_bucket'" %}  ${seats_bucket}
+      {% elsif breakdown_by._parameter_value == "'status'" %} ${account_status}
+      {% elsif breakdown_by._parameter_value == "'seats'" %}  ${seats_bucket}
       {% else %}                                                    ${plan_tier}
       {% endif %} ;;
   }

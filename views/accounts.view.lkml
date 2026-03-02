@@ -174,12 +174,12 @@ view: accounts {
   # ----------------------------------------------------------
   # FILTER FIELD — exposes full Looker filter operators
   # (contains, starts with, is, is not, between, etc.)
-  # Use {% condition %} in derived table SQL to inject the filter.
+  # Use the condition/endcondition Liquid tags in derived table SQL to inject the filter.
   # ----------------------------------------------------------
   filter: account_name_filter {
     type:             string
     label:            "Account Name (Filter)"
-    description:      "Supports full filter operators: contains, starts with, matches, etc. Use in derived tables with {% condition %}."
+    description:      "Supports full filter operators: contains, starts with, matches, etc. Use in derived tables with the condition/endcondition Liquid tags."
     suggest_explore:  accounts
     suggest_dimension: accounts.account_name
   }
@@ -187,7 +187,7 @@ view: accounts {
   filter: signup_date_filter {
     type:        date
     label:       "Signup Date (Filter)"
-    description: "Date range filter for signup date. Inject into derived table SQL with {% condition %}."
+    description: "Date range filter for signup date. Inject into derived table SQL with the condition/endcondition Liquid tags."
   }
 
   # -------------------------------------------------------

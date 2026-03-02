@@ -325,3 +325,180 @@ view: support_health_snapshot {
     value_format_name: percent_1
   }
 }
+
+########################################
+# INCREMENTAL PDT
+########################################
+# Instead of rebuilding the entire table on every trigger, an incremental PDT
+# only processes rows newer than the last build using {% incrementcondition %}.
+# This is a major performance win for large event tables.
+#
+# Requirements:
+#   - PDT writeback schema configured in Looker Admin
+#   - Source table has a reliable, monotonically increasing date/timestamp column
+#   - increment_offset: N reprocesses the last N periods to catch late-arriving rows
+########################################
+
+view: feature_events_incremental_pdt {
+  derived_table: {
+    # PDT NOTE: Requires writeback schema in Looker Admin > Connections.
+    # Uncomment when configured:
+    # datagroup_trigger: daily_refresh
+    # increment_key: "event_date"
+    # increment_offset: 3  # reprocess last 3 days to catch late-arriving events
+
+    sql:
+      SELECT
+        DATE(event_timestamp)                       AS event_date,
+        account_id,
+        feature_name,
+        COUNT(*)                                    AS event_count,
+        SUM(usage_count)                            AS total_usage_count,
+        SUM(usage_duration_secs)                    AS total_duration_secs,
+        SUM(error_count)                            AS total_errors,
+        COUNT(DISTINCT subscription_id)             AS distinct_subscriptions
+      FROM `@{dataset}.@{table_prefix}feature_usage`
+      -- When incremental key is enabled, Looker injects the date range filter here:
+      -- WHERE {% incrementcondition %} event_timestamp {% endincrementcondition %}
+      GROUP BY 1, 2, 3 ;;
+  }
+
+  dimension: pk {
+    type:        string
+    sql:         CONCAT(${TABLE}.event_date, '|', ${TABLE}.account_id, '|', ${TABLE}.feature_name) ;;
+    primary_key: yes
+    hidden:      yes
+  }
+
+  dimension: event_date {
+    type: date
+    sql:  ${TABLE}.event_date ;;
+  }
+
+  dimension: account_id {
+    type:   string
+    sql:    ${TABLE}.account_id ;;
+    hidden: yes
+  }
+
+  dimension: feature_name {
+    type:  string
+    sql:   ${TABLE}.feature_name ;;
+    label: "Feature"
+  }
+
+  measure: total_event_count {
+    type:  sum
+    sql:   ${TABLE}.event_count ;;
+    label: "Total Events"
+    value_format_name: decimal_0
+  }
+
+  measure: total_usage_count {
+    type:  sum
+    sql:   ${TABLE}.total_usage_count ;;
+    label: "Total Usage Count"
+    value_format_name: decimal_0
+  }
+
+  measure: total_duration_mins {
+    type:  number
+    sql:   SUM(${TABLE}.total_duration_secs) / 60 ;;
+    label: "Total Usage Duration (mins)"
+    value_format_name: decimal_1
+  }
+
+  measure: total_errors {
+    type:  sum
+    sql:   ${TABLE}.total_errors ;;
+    label: "Total Errors"
+    value_format_name: decimal_0
+  }
+}
+
+
+########################################
+# BIGQUERY-OPTIMIZED PDT
+########################################
+# partition_keys: reduces data scanned for date-filtered queries (BigQuery billing win)
+# cluster_keys: further sorts within partitions for fast account/feature lookups
+#
+# Requires: BigQuery dialect + PDT writeback schema
+########################################
+
+view: account_feature_summary_optimized_pdt {
+  derived_table: {
+    # PDT NOTE: Requires writeback schema in Looker Admin > Connections.
+    # Uncomment when configured:
+    # datagroup_trigger: daily_refresh
+    # partition_keys:  ["summary_date"]          # partition by date — reduces scan cost
+    # cluster_keys:    ["account_id", "feature_name"]  # cluster within partition
+
+    sql:
+      SELECT
+        DATE(event_timestamp)         AS summary_date,
+        account_id,
+        feature_name,
+        COUNT(*)                      AS event_count,
+        SUM(usage_count)              AS usage_count,
+        SUM(error_count)              AS error_count,
+        MAX(mrr_at_time)              AS mrr_snapshot,
+        COUNT(DISTINCT subscription_id) AS subscription_count
+      FROM `@{dataset}.@{table_prefix}feature_usage`
+      GROUP BY 1, 2, 3 ;;
+  }
+
+  dimension: pk {
+    type:        string
+    sql:         CONCAT(${TABLE}.summary_date, '|', ${TABLE}.account_id, '|', ${TABLE}.feature_name) ;;
+    primary_key: yes
+    hidden:      yes
+  }
+
+  dimension: summary_date {
+    type:        date
+    sql:         ${TABLE}.summary_date ;;
+    convert_tz:  no
+    label:       "Summary Date"
+  }
+
+  dimension: account_id {
+    type: string
+    sql: ${TABLE}.account_id ;;
+    hidden: yes
+  }
+
+  dimension: feature_name {
+    type: string
+    sql: ${TABLE}.feature_name ;;
+    label: "Feature"
+  }
+
+  measure: total_events {
+    type: sum
+    sql: ${TABLE}.event_count ;;
+    label: "Events"
+    value_format_name: decimal_0
+  }
+
+  measure: total_usage {
+    type: sum
+    sql: ${TABLE}.usage_count ;;
+    label: "Usage Count"
+    value_format_name: decimal_0
+  }
+
+  measure: total_errors {
+    type: sum
+    sql: ${TABLE}.error_count ;;
+    label: "Errors"
+    value_format_name: decimal_0
+  }
+
+  measure: mrr_snapshot {
+    type: sum
+    sql: ${TABLE}.mrr_snapshot ;;
+    label: "MRR Snapshot"
+    value_format_name: usd_0
+  }
+}

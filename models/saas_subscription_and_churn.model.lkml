@@ -2,6 +2,40 @@ connection: "bq_saas_subscription_and_churn"
 
 include: "/views/*.view.lkml"
 include: "/dashboards/*.dashboard"
+include: "/tests.lkml"        # LookML data validation tests
+
+########################################
+# FISCAL CALENDAR & WEEK SETTINGS
+########################################
+# fiscal_month_offset: 3 means fiscal year starts in April (common in SaaS/enterprise)
+# Change to 0 for calendar year, 1 for February start, etc.
+fiscal_month_offset: 3
+
+# week_start_day: monday aligns with ISO standard and most business reporting
+week_start_day: monday
+
+########################################
+# NAMED VALUE FORMATS
+########################################
+# Define custom reusable formats here. Reference with value_format_name: <name>
+# in any dimension or measure across the project.
+# These formats add units/symbols not available in Looker's built-in formats.
+named_value_format: saas_hours {
+  value_format: "0.0\" hrs\""
+  strict_value_format: no
+}
+
+named_value_format: saas_score {
+  value_format: "0.0\"★\""
+  strict_value_format: no
+}
+
+named_value_format: saas_k_usd {
+  value_format: "$#,##0.0\"K\""
+  strict_value_format: no
+}
+
+
 
 ########################################
 # DATAGROUP — cache policy
@@ -37,6 +71,29 @@ explore: accounts {
     type:         left_outer
     sql_on:       ${accounts.account_id} = ${subscriptions.account_id} ;;
     relationship: one_to_many
+    # fields: whitelist — hide internal/raw fields from this join in this explore
+    fields: [
+      subscriptions.subscription_id,
+      subscriptions.plan_tier,
+      subscriptions.mrr_amount,
+      subscriptions.total_mrr,
+      subscriptions.average_mrr,
+      subscriptions.total_arr,
+      subscriptions.count,
+      subscriptions.start_date,
+      subscriptions.end_date,
+      subscriptions.is_active,
+      subscriptions.churn_flag,
+      subscriptions.subscription_length_days,
+      subscriptions.churn_rate,
+      subscriptions.upgrade_flag,
+      subscriptions.downgrade_flag,
+      subscriptions.churned_mrr,
+      subscriptions.mrr_churn_rate,
+      subscriptions.dynamic_start_date,
+      subscriptions.date_granularity,
+      subscriptions.mrr_tier_html
+    ]
   }
 
   join: churn_events {
@@ -48,6 +105,12 @@ explore: accounts {
   join: support_tickets {
     type:         left_outer
     sql_on:       ${accounts.account_id} = ${support_tickets.account_id} ;;
+    relationship: one_to_many
+  }
+
+  join: base_account_data_view {
+    type:         left_outer
+    sql_on:       ${base_account_data_view.account_id} = ${accounts.account_id} ;;
     relationship: one_to_many
   }
 }
@@ -64,15 +127,22 @@ explore: feature_usage {
   }
 
   join: subscriptions {
-    type:         left_outer
-    sql_on:       ${feature_usage.subscription_id} = ${subscriptions.subscription_id} ;;
+    type: left_outer
+    sql_on: ${feature_usage.subscription_id} = ${subscriptions.subscription_id} ;;
     relationship: many_to_one
   }
 
   join: accounts {
-    type:         left_outer
-    sql_on:       ${subscriptions.account_id} = ${accounts.account_id} ;;
+    type: left_outer
+    sql_on: ${subscriptions.account_id} = ${accounts.account_id} ;;
     relationship: many_to_one
+    required_joins: [feature_map]
+  }
+
+  join: base_account_data_view {
+    type:         left_outer
+    sql_on:       ${base_account_data_view.account_id} = ${accounts.account_id} ;;
+    relationship: one_to_many
   }
 }
 
@@ -115,6 +185,12 @@ explore: subscriptions {
     type:         left_outer
     sql_on:       ${feature_usage.feature_name} = ${feature_map.feature_id} ;;
     relationship: many_to_one
+  }
+
+  join: base_account_data_view {
+    type:         left_outer
+    sql_on:       ${base_account_data_view.account_id} = ${accounts.account_id} ;;
+    relationship: one_to_many
   }
 }
 
@@ -177,4 +253,97 @@ explore: advanced_liquid_demo {
   sql_always_where:
     ${advanced_liquid_demo.account_id} IS NOT NULL
     AND ${advanced_liquid_demo.plan_tier} IN ('Basic', 'Pro', 'Enterprise') ;;
+}
+
+########################################
+# BASE EXPLORE — extension: required
+########################################
+# Abstract base that cannot be queried directly.
+# Concrete explores inherit its joins via `extends:`.
+# Use this pattern to share common joins without repeating them.
+########################################
+
+# Abstract explore: purely for metadata and shared filters
+explore: base_account_data {
+  extension: required
+  label: "Abstract Base Account Explore"
+  description: "Contains metadata, shared filters, etc. — not queryable"
+}
+# Concrete explore — must use a base view, not derived table
+explore: active_accounts_only {
+  extends: [base_account_data]
+  from: accounts        # base table, NOT a derived table
+  label: "Active Accounts"
+
+  join: subscriptions {
+    type: left_outer
+    sql_on: ${active_accounts_only.account_id}.account_id} = ${subscriptions.account_id} ;;
+    relationship: one_to_many
+  }
+
+  join: churn_events {
+    type: left_outer
+    sql_on: ${active_accounts_only.account_id}.account_id} = ${churn_events.account_id} ;;
+    relationship: one_to_many
+  }
+
+  join: feature_usage {
+    type: left_outer
+    sql_on: ${subscriptions.subscription_id} = ${feature_usage.subscription_id} ;;
+    relationship: many_to_one
+  }
+
+  always_filter: {
+    filters: [active_accounts_only.churn_flag: "No"]   # filter must reference a joined view
+  }
+}
+
+########################################
+# from: ALIASING — join same view twice
+########################################
+# A contract can have both a billing contact and a technical contact,
+# both sourced from the accounts view but under different aliases.
+# This pattern uses from: to join the same view under two different names.
+########################################
+
+explore: churn_with_referral {
+  label:       "Churn with Referral (from: alias)"
+  description: "Demonstrates joining the accounts view twice: once as the churned account, once as the account that referred them."
+  from:        accounts              # base explore uses accounts as the primary view
+
+  join: referring_account {
+    from:         accounts           # reuse the same accounts view under a different name
+    type:         left_outer
+    sql_on:       ${churn_with_referral.referral_source} = ${referring_account.account_name} ;;
+    relationship: many_to_one
+    view_label:   "Referring Account"   # how it appears in the field picker
+    fields:       [referring_account.account_id, referring_account.account_name,
+      referring_account.plan_tier, referring_account.industry]
+  }
+
+  join: churn_events {
+    type:         left_outer
+    sql_on:       ${churn_with_referral.account_id} = ${churn_events.account_id} ;;
+    relationship: one_to_many
+  }
+}
+
+########################################
+# INCREMENTAL + OPTIMIZED PDT EXPLORES
+########################################
+
+explore: feature_events_incremental_pdt {
+  label:       "Feature Events (Incremental PDT)"
+  description: "Event-level feature usage pre-aggregated daily. Uses incremental rebuild — only processes new rows on each trigger."
+}
+
+explore: account_feature_summary_optimized_pdt {
+  label:       "Account Feature Summary (BigQuery-Optimized PDT)"
+  description: "Feature usage summarized per account/feature/day. Partitioned by date and clustered by account_id + feature_name for fast queries."
+
+  join: accounts {
+    type:         left_outer
+    sql_on:       ${account_feature_summary_optimized_pdt.account_id} = ${accounts.account_id} ;;
+    relationship: many_to_one
+  }
 }

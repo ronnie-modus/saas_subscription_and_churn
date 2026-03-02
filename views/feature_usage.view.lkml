@@ -34,6 +34,7 @@ view: feature_usage {
     type:       time
     timeframes: [raw, date, week, month, quarter, year, day_of_week, month_num]
     datatype:   date
+    convert_tz: no
     sql:        SAFE_CAST(${TABLE}.usage_date AS DATE) ;;
     label:      "Usage"
     description: "Date when this feature usage event occurred."
@@ -165,9 +166,21 @@ view: feature_usage {
     value_format_name: decimal_0
   }
 
-  measure: average_usage_count {
-    type:        average
-    sql:         ${usage_count} ;;
+  # sql_distinct_key: deduplicates on subscription_id before summing.
+  # Feature_usage is at event-level, so summing mrr_at_time without dedup
+  # would inflate the result (same subscription appears for every event).
+  measure: total_mrr_at_usage_time {
+    type:             sum
+    sql:              ${TABLE}.mrr_at_time ;;
+    sql_distinct_key: ${TABLE}.subscription_id
+          label:            "Total MRR at Usage Time (Deduped)"
+          description:      "Sum of MRR at time of usage. Uses sql_distinct_key to avoid fanout inflation — one subscription_id may appear across many events."
+          value_format_name: usd_0
+        }
+
+      measure: average_usage_count {
+      type:        average
+      sql:         ${usage_count} ;;
     label:       "Avg Usage Count per Event"
     description: "Average usage_count per usage event."
     value_format_name: decimal_1

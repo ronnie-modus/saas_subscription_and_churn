@@ -52,6 +52,7 @@ view: accounts {
     type:        time
     timeframes:  [raw, date, week, month, quarter, year, month_num, day_of_week]
     datatype:    date
+    convert_tz:  no
     sql:         SAFE_CAST(${TABLE}.signup_date AS DATE) ;;
     label:       "Signup"
     description: "Date the account was created."
@@ -169,6 +170,26 @@ view: accounts {
     description: "Derived account status: Active, Trial, or Churned."
   }
 
+
+  # ----------------------------------------------------------
+  # FILTER FIELD — exposes full Looker filter operators
+  # (contains, starts with, is, is not, between, etc.)
+  # Use {% condition %} in derived table SQL to inject the filter.
+  # ----------------------------------------------------------
+  filter: account_name_filter {
+    type:             string
+    label:            "Account Name (Filter)"
+    description:      "Supports full filter operators: contains, starts with, matches, etc. Use in derived tables with {% condition %}."
+    suggest_explore:  accounts
+    suggest_dimension: accounts.account_name
+  }
+
+  filter: signup_date_filter {
+    type:        date
+    label:       "Signup Date (Filter)"
+    description: "Date range filter for signup date. Inject into derived table SQL with {% condition %}."
+  }
+
   # -------------------------------------------------------
   # MEASURES
   # -------------------------------------------------------
@@ -181,6 +202,7 @@ view: accounts {
   }
 
   measure: count_active {
+    alias:       [active_count]
     type:        count
     label:       "Active Accounts"
     description: "Number of accounts that have NOT churned and are not on trial."
@@ -197,6 +219,7 @@ view: accounts {
   }
 
   measure: count_churned {
+    alias:       [churned_count, total_churned]
     type:        count
     label:       "Churned Accounts"
     description: "Number of accounts that have churned."
@@ -205,6 +228,7 @@ view: accounts {
   }
 
   measure: churn_rate {
+    alias:       [churned_rate, churn_percentage]
     type:        number
     sql:         SAFE_DIVIDE(${count_churned}, NULLIF(${count}, 0)) ;;
     label:       "Account Churn Rate"

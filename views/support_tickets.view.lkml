@@ -228,7 +228,7 @@ view: support_tickets {
     sql:         ${resolution_time_hours} ;;
     label:       "Avg Resolution Time (Hours)"
     description: "Average time from ticket open to close in hours."
-    value_format_name: decimal_1
+    value_format_name: saas_hours
     drill_fields: [ticket_id, priority, resolution_time_hours, escalation_flag]
   }
 
@@ -238,7 +238,7 @@ view: support_tickets {
     sql:         ${resolution_time_hours} ;;
     label:       "Median Resolution Time (Hours)"
     description: "Median resolution time (P50) in hours."
-    value_format_name: decimal_1
+    value_format_name: saas_hours
   }
 
   measure: p90_resolution_time_hours {
@@ -247,7 +247,7 @@ view: support_tickets {
     sql:         ${resolution_time_hours} ;;
     label:       "P90 Resolution Time (Hours)"
     description: "90th percentile resolution time in hours (SLA worst-case)."
-    value_format_name: decimal_1
+    value_format_name: saas_hours
   }
 
   measure: average_first_response_time_minutes {
@@ -255,7 +255,7 @@ view: support_tickets {
     sql:         ${first_response_time_minutes} ;;
     label:       "Avg First Response Time (Mins)"
     description: "Average time to first agent response in minutes."
-    value_format_name: decimal_1
+    value_format_name: saas_hours
   }
 
   measure: median_first_response_time_minutes {
@@ -264,7 +264,7 @@ view: support_tickets {
     sql:         ${first_response_time_minutes} ;;
     label:       "Median First Response Time (Mins)"
     description: "Median time to first agent response in minutes."
-    value_format_name: decimal_1
+    value_format_name: saas_hours
   }
 
   # -------------------------------------------------------
@@ -276,7 +276,7 @@ view: support_tickets {
     sql:         ${satisfaction_score} ;;
     label:       "Avg CSAT Score"
     description: "Average customer satisfaction score (1-5, excludes NULLs)."
-    value_format_name: decimal_2
+    value_format_name: saas_score  # custom named format defined in model: 0.0★
     drill_fields: [ticket_id, satisfaction_score, priority, escalation_flag, resolution_time_hours]
   }
 
@@ -368,7 +368,7 @@ view: support_tickets {
     sql:         ${resolution_time_hours} ;;
     label:       "P25 Resolution Time (Hours)"
     description: "25th percentile resolution time — lower quartile."
-    value_format_name: decimal_1
+    value_format_name: saas_hours
   }
 
   measure: p75_resolution_time_hours {
@@ -377,7 +377,7 @@ view: support_tickets {
     sql:         ${resolution_time_hours} ;;
     label:       "P75 Resolution Time (Hours)"
     description: "75th percentile resolution time — upper quartile."
-    value_format_name: decimal_1
+    value_format_name: saas_hours
   }
 
   measure: min_resolution_hours {
@@ -385,7 +385,7 @@ view: support_tickets {
     sql:         SAFE_CAST(${TABLE}.resolution_time_hours AS FLOAT64) ;;
     label:       "Min Resolution Time (Hours)"
     description: "Fastest ticket resolution in the result set."
-    value_format_name: decimal_1
+    value_format_name: saas_hours
   }
 
   measure: max_resolution_hours {
@@ -393,6 +393,6 @@ view: support_tickets {
     sql:         SAFE_CAST(${TABLE}.resolution_time_hours AS FLOAT64) ;;
     label:       "Max Resolution Time (Hours)"
     description: "Slowest ticket resolution in the result set."
-    value_format_name: decimal_1
+    value_format_name: saas_hours
   }
 }

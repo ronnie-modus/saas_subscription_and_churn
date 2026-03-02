@@ -34,6 +34,7 @@ view: subscriptions {
     type:       time
     timeframes: [raw, date, week, month, quarter, year, month_num]
     datatype:   date
+    convert_tz: no
     sql:        SAFE_CAST(${TABLE}.start_date AS DATE) ;;
     label:      "Subscription Start"
     description: "Date the subscription began."
@@ -43,6 +44,7 @@ view: subscriptions {
     type:       time
     timeframes: [raw, date, week, month, quarter, year, month_num]
     datatype:   date
+    convert_tz: no
     sql:        SAFE_CAST(${TABLE}.end_date AS DATE) ;;
     label:      "Subscription End"
     description: "Date the subscription ended. NULL if still active."
@@ -268,6 +270,7 @@ view: subscriptions {
   # -------------------------------------------------------
 
   measure: total_mrr {
+    alias:       [mrr_total, sum_mrr]
     type:        sum
     sql:         ${mrr_amount} ;;
     label:       "Total MRR"
@@ -288,6 +291,7 @@ view: subscriptions {
   }
 
   measure: average_mrr {
+    alias:       [avg_mrr, mean_mrr]
     type:        average
     sql:         ${mrr_amount} ;;
     label:       "Avg MRR per Subscription"

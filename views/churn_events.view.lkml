@@ -34,6 +34,7 @@ view: churn_events {
     type:       time
     timeframes: [raw, date, week, month, quarter, year, month_num]
     datatype:   date
+    convert_tz: no
     sql:        SAFE_CAST(${TABLE}.churn_date AS DATE) ;;
     label:      "Churn"
     description: "Date the account churned."

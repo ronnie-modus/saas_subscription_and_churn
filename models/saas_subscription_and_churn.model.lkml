@@ -123,3 +123,58 @@ explore: conversion_funnel {
   label:       "Conversion Funnel"
   description: "Staged conversion funnel from signup through trial, paid, retained, upgraded and churned."
 }
+
+# --- Native Derived Table Explore ---
+explore: plan_tier_summary_ndt {
+  label:       "Plan Tier Summary (NDT)"
+  description: "Pre-aggregated plan tier KPIs built from an explore_source NDT. Fast, always in sync."
+  persist_with: daily_refresh
+}
+
+# --- PDT Explores ---
+explore: account_mrr_summary {
+  label:       "Account MRR Summary (PDT)"
+  description: "Pre-aggregated per-account MRR. Rebuilt daily via datagroup_trigger."
+}
+
+explore: monthly_cohort_retention {
+  label:       "Monthly Cohort Retention (PDT)"
+  description: "Cohort retention built from churn data. Rebuilt when churn data changes via sql_trigger_value."
+}
+
+explore: support_health_snapshot {
+  label:       "Support Health Snapshot (PDT)"
+  description: "Support KPIs pre-aggregated per account. Rebuilt every 6 hours via persist_for."
+
+  join: accounts {
+    type:         left_outer
+    sql_on:       ${support_health_snapshot.account_id} = ${accounts.account_id} ;;
+    relationship: many_to_one
+  }
+}
+
+# --- Enterprise Accounts (Extension) Explore ---
+explore: enterprise_accounts {
+  label:       "Enterprise Accounts (Extension)"
+  description: "Extends the base accounts view with enterprise-specific dimensions and measures."
+
+  join: subscriptions {
+    type:         left_outer
+    sql_on:       ${enterprise_accounts.account_id} = ${subscriptions.account_id} ;;
+    relationship: one_to_many
+  }
+}
+
+# --- Advanced Liquid Demo Explore ---
+explore: advanced_liquid_demo {
+  label:       "Advanced Liquid Demo"
+  description: "Demonstrates _in_query, _is_selected, _is_filtered, _user_attributes, manifest constants, and parameter combinations."
+
+  # sql_always_where: invisible filter — users cannot see or override this.
+  # Unlike always_filter (visible in UI), this is injected directly into SQL.
+  # Use case: enforce data access rules that must never be bypassed.
+  # Must reference fully-qualified fields (view.field), not ${TABLE}.column
+  sql_always_where:
+    ${advanced_liquid_demo.account_id} IS NOT NULL
+    AND ${advanced_liquid_demo.plan_tier} IN ('Basic', 'Pro', 'Enterprise') ;;
+}

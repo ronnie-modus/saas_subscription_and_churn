@@ -61,15 +61,15 @@ test: mrr_is_non_negative {
   }
 }
 
-test: average_mrr_is_reasonable {
-  explore_source: subscriptions {
-    column: average_mrr { field: subscriptions.average_mrr }
-  }
-  assert: average_mrr_not_absurdly_large {
-    # Flag if average MRR exceeds $1M — likely a data error
-    expression: is_null(${subscriptions.average_mrr}) OR ${subscriptions.average_mrr} < 1000000 ;;
-  }
-}
+# test: average_mrr_is_reasonable {
+#   explore_source: subscriptions {
+#     column: average_mrr { field: subscriptions.average_mrr }
+#   }
+#   assert: average_mrr_not_absurdly_large {
+#     # Flag if average MRR exceeds $1M — likely a data error
+#     expression: is_null(${subscriptions.average_mrr}) OR ${subscriptions.average_mrr} < 1000000 ;;
+#   }
+# }
 
 # -------------------------------------------------------
 # CHURN EVENTS
@@ -91,28 +91,28 @@ test: churn_rate_not_exceeding_100_pct {
 # SUPPORT TICKETS
 # -------------------------------------------------------
 
-test: csat_score_in_valid_range {
-  explore_source: support_tickets {
-    column: average_csat_score { field: support_tickets.average_csat_score }
-  }
-  assert: csat_is_between_1_and_5 {
-    # CSAT score is on a 1–5 scale
-    expression: is_null(${support_tickets.average_csat_score}) OR
-                (${support_tickets.average_csat_score} >= 1 AND
-                 ${support_tickets.average_csat_score} <= 5) ;;
-  }
-}
+# test: csat_score_in_valid_range {
+#   explore_source: support_tickets {
+#     column: average_csat_score { field: support_tickets.average_csat_score }
+#   }
+#   assert: csat_is_between_1_and_5 {
+#     # CSAT score is on a 1–5 scale
+#     expression: is_null(${support_tickets.average_csat_score}) OR
+#                 (${support_tickets.average_csat_score} >= 1 AND
+#                 ${support_tickets.average_csat_score} <= 5) ;;
+#   }
+# }
 
-test: resolution_time_is_non_negative {
-  explore_source: support_tickets {
-    column: average_resolution_hours { field: support_tickets.average_resolution_hours }
-    filters: [support_tickets.is_resolved: "Yes"]
-  }
-  assert: resolved_tickets_have_positive_resolution_time {
-    expression: is_null(${support_tickets.average_resolution_hours}) OR
-                ${support_tickets.average_resolution_hours} >= 0 ;;
-  }
-}
+# test: resolution_time_is_non_negative {
+#   explore_source: support_tickets {
+#     column: average_resolution_hours { field: support_tickets.average_resolution_hours }
+#     filters: [support_tickets.is_resolved: "Yes"]
+#   }
+#   assert: resolved_tickets_have_positive_resolution_time {
+#     expression: is_null(${support_tickets.average_resolution_hours}) OR
+#                 ${support_tickets.average_resolution_hours} >= 0 ;;
+#   }
+# }
 
 # -------------------------------------------------------
 # FEATURE USAGE

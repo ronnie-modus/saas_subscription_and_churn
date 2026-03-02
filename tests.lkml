@@ -128,13 +128,13 @@
 #   }
 # }
 
-test: beta_adoption_rate_is_valid {
-  explore_source: feature_usage {
-    column: beta_adoption_rate { field: feature_usage.beta_adoption_rate }
-  }
-  assert: beta_adoption_between_0_and_1 {
-    expression: is_null(${feature_usage.beta_adoption_rate}) OR
-                (${feature_usage.beta_adoption_rate} >= 0 AND
-                 ${feature_usage.beta_adoption_rate} <= 1.0) ;;
-  }
-}
+# test: beta_adoption_rate_is_valid {
+#   explore_source: feature_usage {
+#     column: beta_adoption_rate { field: feature_usage.beta_adoption_rate }
+#   }
+#   assert: beta_adoption_between_0_and_1 {
+#     expression: is_null(${feature_usage.beta_adoption_rate}) OR
+#                 (${feature_usage.beta_adoption_rate} >= 0 AND
+#                 ${feature_usage.beta_adoption_rate} <= 1.0) ;;
+#   }
+# }

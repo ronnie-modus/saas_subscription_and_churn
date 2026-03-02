@@ -18,15 +18,24 @@
 # ACCOUNTS
 # -------------------------------------------------------
 
-# test: churn_rate_between_0_and_100 {
-#   explore_source: accounts {
-#     column: churn_rate { field: accounts.churn_rate }
-#   }
-#   assert: churn_rate_is_valid_percentage {
-#     # churn_rate is stored as a decimal (0.0–1.0), multiply by 100 to get %
-#     expression: ${accounts.churn_rate} >= 0 AND ${accounts.churn_rate} <= 1.0 ;;
-#   }
-# }
+test: churn_rate_between_0_and_100 {
+  explore_source: accounts {
+    column: churn_rate { field: accounts.churn_rate }
+  }
+  assert: churn_rate_is_valid_percentage {
+    # churn_rate is stored as a decimal (0.0–1.0), multiply by 100 to get %
+    expression: ${accounts.churn_rate} >= 0 AND ${accounts.churn_rate} <= 1.0 ;;
+  }
+}
+
+test: accounts_table_has_data {
+  explore_source: accounts {
+    column: count { field: accounts.count }
+  }
+  assert: at_least_one_account_exists {
+    expression: ${accounts.count} > 0 ;;
+  }
+}
 
 # test: trial_conversion_rate_is_valid {
 #   explore_source: accounts {
@@ -51,15 +60,24 @@
 # # SUBSCRIPTIONS
 # # -------------------------------------------------------
 
-# test: mrr_is_non_negative {
-#   explore_source: subscriptions {
-#     column: total_mrr { field: subscriptions.total_mrr }
-#     filters: [subscriptions.is_active: "Yes"]
-#   }
-#   assert: active_subscriptions_have_positive_mrr {
-#     expression: is_null(${subscriptions.total_mrr}) OR ${subscriptions.total_mrr} >= 0 ;;
-#   }
-# }
+test: subscriptions_table_has_data {
+  explore_source: subscriptions {
+    column: count { field: subscriptions.count }
+  }
+  assert: at_least_one_subscription_exists {
+    expression: ${subscriptions.count} > 0 ;;
+  }
+}
+
+test: mrr_is_non_negative {
+  explore_source: subscriptions {
+    column: total_mrr { field: subscriptions.total_mrr }
+    filters: [subscriptions.is_active: "Yes"]
+  }
+  assert: active_subscriptions_have_positive_mrr {
+    expression: is_null(${subscriptions.total_mrr}) OR ${subscriptions.total_mrr} >= 0 ;;
+  }
+}
 
 # # test: average_mrr_is_reasonable {
 # #   explore_source: subscriptions {

@@ -258,32 +258,27 @@ explore: advanced_liquid_demo {
 ########################################
 # BASE EXPLORE — extension: required
 ########################################
-# Abstract base that cannot be queried directly.
-# Concrete explores inherit its joins via `extends:`.
-# Use this pattern to share common joins without repeating them.
-########################################
 
-# Abstract explore: purely for metadata and shared filters
 explore: base_account_data {
   extension: required
   label: "Abstract Base Account Explore"
   description: "Contains metadata, shared filters, etc. — not queryable"
 }
-# Concrete explore — must use a base view, not derived table
+
 explore: active_accounts_only {
   extends: [base_account_data]
-  from: accounts        # base table, NOT a derived table
+  from: accounts
   label: "Active Accounts"
 
   join: subscriptions {
     type: left_outer
-    sql_on: ${active_accounts_only.account_id}.account_id} = ${subscriptions.account_id} ;;
+    sql_on: ${active_accounts_only.account_id} = ${subscriptions.account_id} ;;
     relationship: one_to_many
   }
 
   join: churn_events {
     type: left_outer
-    sql_on: ${active_accounts_only.account_id}.account_id} = ${churn_events.account_id} ;;
+    sql_on: ${active_accounts_only.account_id} = ${churn_events.account_id} ;;
     relationship: one_to_many
   }
 
@@ -294,29 +289,25 @@ explore: active_accounts_only {
   }
 
   always_filter: {
-    filters: [active_accounts_only.churn_flag: "No"]   # filter must reference a joined view
+    filters: [active_accounts_only.churn_flag: "No"]
   }
 }
 
 ########################################
 # from: ALIASING — join same view twice
 ########################################
-# A contract can have both a billing contact and a technical contact,
-# both sourced from the accounts view but under different aliases.
-# This pattern uses from: to join the same view under two different names.
-########################################
 
 explore: churn_with_referral {
   label:       "Churn with Referral (from: alias)"
   description: "Demonstrates joining the accounts view twice: once as the churned account, once as the account that referred them."
-  from:        accounts              # base explore uses accounts as the primary view
+  from:        accounts
 
   join: referring_account {
-    from:         accounts           # reuse the same accounts view under a different name
+    from:         accounts
     type:         left_outer
     sql_on:       ${churn_with_referral.referral_source} = ${referring_account.account_name} ;;
     relationship: many_to_one
-    view_label:   "Referring Account"   # how it appears in the field picker
+    view_label:   "Referring Account"
     fields:       [referring_account.account_id, referring_account.account_name,
       referring_account.plan_tier, referring_account.industry]
   }
